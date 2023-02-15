@@ -13,7 +13,6 @@ type: book
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-reticulate::repl_python()
 ```
 
 ## Problem Set 3

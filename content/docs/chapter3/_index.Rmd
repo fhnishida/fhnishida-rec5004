@@ -13,13 +13,10 @@ type: book
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-reticulate::repl_python()
 ```
 
 
-
 ## Resumindo dados
-
 
 ### Funções básicas
 - [Summarizing data (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/e5qVi/summarizing-data)
@@ -265,7 +262,7 @@ sapply(split(x, grupos), mean)
 
 
 
-## Manipulação de dados
+## Manipulando dados
 
 > “Between 30% to 80% of the data analysis task is spent on cleaning and understanding the data.” (Dasu \& Johnson, 2003)
 
@@ -387,12 +384,12 @@ x
 #### Mesclando base de dados com `merge()`
 - [Merging data (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/pVV6K/merging-data)
 - Podemos juntar base de dados a partir de uma variável-chave que aparece em ambas bases.
-- Como exemplo, utilizaremos duas bases de dados de respostas a perguntas (`solutions`) e de correções feitas por seus pares (`reviews`).
+- Como exemplo, utilizaremos duas bases de dados de respostas a perguntas ([`solutions.csv`](https://fhnishida-rec5004.netlify.app/docs/solutions.csv)) e de correções feitas por seus pares ([`reviews.csv`](https://fhnishida-rec5004.netlify.app/docs/reviews.csv)).
 ```{r}
-solutions = read.csv("https://raw.githubusercontent.com/jtleek/dataanalysis/master/week2/007summarizingData/data/solutions.csv")
+solutions = read.csv("https://fhnishida-rec5004.netlify.app/docs/solutions.csv")
 head(solutions)
 
-reviews = read.csv("https://raw.githubusercontent.com/jtleek/dataanalysis/master/week2/007summarizingData/data/reviews.csv")
+reviews = read.csv("https://fhnishida-rec5004.netlify.app/docs/reviews.csv")
 head(reviews)
 ```
 - Note que:
@@ -440,4 +437,4 @@ head(wrong)
 
 
 
-{{< cta cta_text="👉 Proceed to Session 4" cta_link="../chapter4" >}}
+{{< cta cta_text="👉 Proceed to `dplyr` Manipulation" cta_link="../chapter4" >}}

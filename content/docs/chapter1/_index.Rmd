@@ -13,8 +13,6 @@ type: book
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# setwd("~/../OneDrive/FEA-RP/Disciplinas/REC5004_Econometria-I/Monitoria-FHN/") # ASPIRE 5
-# setwd("~/../FEA-RP/Disciplinas/REC5004_Econometria-I/Monitoria-FHN/") # NITRO 5
 ```
 
 - Baseado, principalmente, nos cursos da [_Especialização em Data Science_](https://www.coursera.org/specializations/jhu-data-science) da universidade John Hopkins (disponível no Coursera).
