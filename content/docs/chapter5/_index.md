@@ -13,14 +13,18 @@ type: book
 
 
 
-## Problem Set 2
+## The Neoclassical Theory of Optimal Growth
+- Chiang (1999): Section 9.3
 
 ## TA Session 5 Recording (in Portuguese)
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/0umglq9dU0k/maxresdefault.jpg)](https://www.youtube.com/watch?v=0umglq9dU0k)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/HJqzq-G40dY/maxresdefault.jpg)](https://www.youtube.com/watch?v=HJqzq-G40dY)
 
-- Problem Set 2 Solution: [Lista-2_Resolucao.pdf](../Lista-2_Resolucao.pdf)
-- Script File: [Lista-2_v2.py](../Lista-2_v2.py)
+- Presentation: [AP_Monitoria-5_pt2.pdf](../AP_Monitoria-5_pt2.pdf)
+
+
+## Problem Set 2
+- [Problem Set 2 Solution](../Lista-2_Resolucao.pdf)
 
 
 {{< cta cta_text="👉 Proceed to Session 6" cta_link="../chapter6" >}}

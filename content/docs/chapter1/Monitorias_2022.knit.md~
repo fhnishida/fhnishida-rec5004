@@ -1,0 +1,6315 @@
+---
+title: "Monitorias de Econometria I (2022)"
+author: "Fábio Nishida (fabio.nishida@usp.br)"
+date: "1º semestre/2022"
+output: md_document
+# output: pdf_document
+---
+
+
+
+# Introdução ao R
+
+- Baseado, principalmente, nos cursos da [_Especialização em Data Science_](https://www.coursera.org/specializations/jhu-data-science) da universidade John Hopkins (disponível no Coursera).
+- Em cada tema abordado serão citadas as fontes, além de incluir aos vídeos dos cursos citados acima para que possam aprofundar nos estudos.
+- Alunos USP conseguem fazer determinados cursos/especializações e pegar o certificado sem pagar: [_Universidade de São Paulo BR on Coursera_](https://www.coursera.org/programs/universidade-de-sao-paulo-br-on-coursera-mvxtw?currentTab=CATALOG&fbclid=IwAR3dT_SDYfjT2FWH06mUcSb8V_z4F9aT_1c6MHHQ3gdiDQ9X9mdRhMcsbOk)
+
+
+## Instalação do R e R Studio
+- [Installing R (John Hopkins/Coursera)](https://www.coursera.org/learn/data-scientists-tools/lecture/y6mU2/installing-r)
+
+1. Instalação da base do R ([CRAN](https://cran.r-project.org))
+    - Download R for Windows > base > Download R X.X.X for Windows
+    - Se o computador for 64-bits, opte pela versão 64-bits (é mais rápida)
+
+2. Instalação do Rtools ([CRAN](https://cran.r-project.org))
+    - Download R for Windows > Rtools > Installing Rtools > rtools40-x86_XX.exe
+    - É um conjunto de ferramentas de compilação de várias linguagens (C, C++ e Fortran) que são necessários em alguns pacotes no R
+
+3. Instalação do RStudio ([RStudio Dowload](https://www.rstudio.com/products/rstudio/download/#download))
+    - Download RStudio Desktop
+    - É uma interface de usuário para facilitar o uso do R
+
+
+## Usando o R Studio
+- [RStudio Tour (John Hopkins/Coursera)](https://www.coursera.org/learn/data-scientists-tools/lecture/0fUNC/rstudio-tour)
+
+RStudio é dividido em 4 quadrantes:
+
+- superior/esquerdo: source - onde ficam "blocos de nota" (scripts) com comandos a serem salvos
+- superior/direito: ambiente - visualizar variáveis
+- inferior/esquerdo: console - executar os comandos e ver resultados (é o R "bruto")
+- inferior/direito: arquivos/gráficos/pacotes/ajuda
+
+> **Dica**: Alterar o tema do RStudio (fundo branco pode cansar mais a visão num tempo mais longo)<br/>  
+Tools > Global Options... > Appearance > Editor theme > Cobalt (meu preferido)
+
+### Diretório de trabalho (_Working Directory_)
+Definir um diretório de trabalho facilita o acesso aos arquivos da pasta (base de dados, etc.).
+
+> Session > Set Working Directory > Choose Directory...
+
+```r
+setwd("C:/Users/Fabio/OneDrive/FEA-RP")
+```
+
+> **Dica**: O comando para definir o diretório de trabalho aparecerá no console. Copie e cole no seu script para não precisar definir toda vez que abre o R Studio.
+
+- Note que usa o "slash" (/) ao invés do "backslash" (\\), então não dá para copiar diretamente o endereço de uma pasta e colar no R sem fazer ajustes:
+```r
+setwd("C:\Users\Fabio\OneDrive\FEA-RP") # ERRADO!
+```
+
+```r
+setwd("C:/Users/Fabio/OneDrive/FEA-RP") # CORRETO!
+setwd("C:\\Users\\Fabio\\OneDrive\\FEA-RP") # CORRETO!
+```
+
+Você pode trocar _backslash_ por _slash_, ou duplicar os _backslashs_.
+
+### Executando comandos no R
+- Execução direta no console: escreva `1 + 1` no console e dê \<Enter\>
+
+```r
+1 + 1
+```
+
+```
+## [1] 2
+```
+- Execução pelo script: escreva o seguinte código abaixo, e dê `Ctrl + Enter` na linha ou no código destacado. Note que o código do script é "jogado" no console.
+
+```r
+rnorm(n=10, mean=0, sd=1)  # Gerar 10 números ~ N(0, 1)
+```
+
+```
+##  [1] -1.09148376  1.12626344 -0.77498910  0.37825372 -0.03297522  0.80941120
+##  [7]  1.08799659 -0.22971288  0.95326312 -1.02670397
+```
+
+```r
+hist(rnorm(n=1000, mean=0, sd=1))  # Histograma dos números gerados
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+
+
+
+### Ajuda para comandos
+```r
+?rnorm
+```
+
+```yaml
+rnorm(n, mean = 0, sd = 1)
+
+n: number of observations. If length(n) > 1, the length is taken to be the number required.
+mean: vector of means.
+sd: vector of standard deviations.
+```
+
+- Note acima em "Usage" que já há valores pré-definidos para `mean = 0` e `sd = 1`. Portanto, se você só informar o `n`, a função irá funcionar, considerando os valores pré-definidos para os demais argumentos.
+- É possível escrever o código sem os nomes dos argumentos, mas devem ser inseridos na mesma ordem do descrito na Ajuda.
+```r
+rnorm(10, 0, 1)
+```
+- Também podemos trocar a ordem explicitando o nome do argumento (NÃO RECOMENDADO)
+```r
+rnorm(mean=0, n=10, sd=1)
+```
+
+## Pacotes do R
+- Pacotes são coleções de funções, dados e códigos escritos por outras pessoas
+- Por ser um software _open source_, o R possui muitos pacotes disponibilizados pela internet e muitos economistas (principalmente econometristas) já desenvolvem e disponibilizam pacotes com as implementações de seus novos métodos (por exemplo, Dif-in-Dif com múltiplos períodos de [Callaway e Sant'Anna (2021)](https://bcallaway11.github.io/did/articles/did-basics.html)
+- A instalação de um pacote só precisa ser feita uma única vez.
+- No entanto, caso você atualize uma nova versão do R, é necessário instalar novamente todos os pacotes.
+- Os pacotes podem ser obtidos em bibliotecas (_libraries_), como CRAN, e de indivíduos (normalmente disponibilizados no GitHub)
+- O CRAN é administrado e, como existe uma curadoria para inserção e manutenção de pacotes novos e defasados, garante qualidade dos pacotes disponibilizados
+- Tome cuidado com pacotes disponibilizados por individuos! É possível executar, dentro do R, códigos para criar e apagar arquivos, por exemplo.
+
+### Instalação via CRAN
+> quadrante inferior/direito > Packages > Install > (Nomes dos pacotes)
+
+```r
+install.packages("ggplot2") # Pacote para criar graficos
+```
+
+### Instalação via GitHub
+- Primeiro, é necessário instalar o pacote `devtools`
+```r
+install.packages("devtools")
+```
+- Depois, é preciso obter o nome do author (do GitHub) e nome do pacote. Como exemplo, iremos baixar o pacote `dplyr` do autor `hadley` (este pacote, na realidade, pode ser baixado direto do CRAN).
+- Para executar uma função de um pacote, podemos usar `<pacote>::<funcao>`
+```r
+devtools::install_github("hadley/dplyr")
+```
+
+- Ou é possível carregar o pacote no ambiente e, depois, chamar a função do pacote carregado
+```r
+library(devtools)
+install_github("hadley/dplyr")
+```
+
+- CUIDADO! Ao carregar varios pacotes, talvez tenha 2 funções com mesmo nome
+    - R prioriza a função do pacote carregado por último
+
+```r
+library(dplyr) # Pacote para manipulacao de base de dados
+```
+
+```
+## Warning: package 'dplyr' was built under R version 4.2.2
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+library(MASS) # Normalmente nao eh carregado diretamente (via outro pacote)
+```
+
+```
+## Warning: package 'MASS' was built under R version 4.2.2
+```
+
+```
+## 
+## Attaching package: 'MASS'
+```
+
+```
+## The following object is masked from 'package:dplyr':
+## 
+##     select
+```
+
+- Uma forma de contornar o problema é usar `<pacote>::<funcao>`
+```r
+select(obj) # do pacote MASS
+dplyr::select(.data, ...) # do pacote dplyr
+```
+
+### Atualizando pacotes
+> quadrante inferior/direito > Packages > Update > Select All > Install Updates
+
+
+
+## Ajuda
+- Caso saiba o nome da função, é possível olhar sua documentação escrevendo `?<nome_da_funcao>`:
+```r
+?rnorm # caso seja função base do R ou o pacote já esteja carregado no R
+?dplyr::select # caso o pacote não esteja carregado (mas esteja instalado)
+```
+
+- Caso saiba o nome do pacote, em alguns casos funciona `?<nome_do_pacote>`, mas o ideal é buscar sua documentação no CRAN (diretamente no site ou via Google)
+    - Por exemplo, podemos acessar a página do [pacote `dplyr` no CRAN](https://cran.r-project.org/web/packages/dplyr/index.html):
+<center><img src="https://fhnishida.github.io/fearp/eco1/dplyr_cran.png"></center>
+    - Nela é possível ver a partir de qual versão do R funciona, os pacotes necessários para o seu funcionamento (Imports), os autores e sites.
+    - Em Documentação, é possível ver o seu 'Reference manual' onde são expostos o objetivo do pacotes e as funções, incluindo explicações de seu funcionamento.
+    - Além disso, pode ser interessante ver aplicações do pacote e suas funções nas 'vignettes'. Normalmente são expostas de maneira que podem ser replicadas no seu computador, o que acaba auxiliando na sua aplicação (verificar estrutura de base de dados necessária, sintaxes, etc.). Também pode ser acessada diretamente do R usando a função `browseVignettes()`:
+```r
+browseVignettes("dplyr") # Abrirá uma página com vignettes no seu navegador
+```
+
+
+- Caso não saiba quais funções/pacotes são utilizados para resolver um problema, muitas vezes é possível encontrar a solução no Google utilizando palavras-chave (preferencialmente em inglês) junto de "R".
+<center><img src="https://fhnishida.github.io/fearp/eco1/google_help.png"></center>
+    - Além de sites especializados em R e vídeos com exemplos de aplicações, é comum aparecer questões no site Stack Overflow (ou em Cross Validated, pertencente ao mesmo grupo) que é o site mais utilizado por programadores em diversas linguagens para esclarecer dúvidas.
+    - Por R ser uma linguagem open source, há muitos usuários e, portanto, é comum achar perguntas/respostas que já solucionam o seu problema. Eventualmente, você pode fazer a sua pergunta, caso não encontre uma satisfatória.
+<center><img src="https://fhnishida.github.io/fearp/eco1/stackoverflow_help.png"></center>
+
+## Sincronização de projeto no GitHub
+Não será detalhado aqui, mas é algo interessante para olhar.
+
+- [Criação de projetos](https://www.coursera.org/learn/data-scientists-tools/lecture/2o9zr/projects-in-r)
+- [Controle de versão](https://www.coursera.org/learn/data-scientists-tools/lecture/PjlHw/version-control)
+- [GitHub e Git](https://www.coursera.org/learn/data-scientists-tools/lecture/VOh24/github-and-git)
+- [Projetos sob controle de versões](https://www.coursera.org/learn/data-scientists-tools/lecture/wbfrX/projects-under-version-control)
+
+
+## R Markdown
+Markdown é uma sintaxe de formatação simples para criar documento HTML, PDF ou Word.
+
+Para mais detalhes de uso, veja:
+
+- [R Markdown (John Hopkins/Coursera)](https://www.coursera.org/lecture/data-scientists-tools/r-markdown-134kE)
+- Curso [_Reproducible Templates for Analysis and Dissemination_ (Emory/Coursera)]( https://www.coursera.org/learn/reproducible-templates-analysis)
+- Livros: [_R Markdown: The Definitive Guide_](https://bookdown.org/yihui/rmarkdown/) e [_R Markdown Cookbook_](https://bookdown.org/yihui/rmarkdown-cookbook)
+
+
+
+### Uso do R Markdown
+Quando você clicar no botão **Knit**, um documento será gerado, incluindo o conteúdo textual e os resultados dos _chunks_ com códigos em R embutidos no documento.
+
+> Para gerar em pdf, pode ser necessário instalar o pacote `tinytex`
+
+Você pode embutir um _chunk_ de código em R: 
+
+1. abrindo com 3 acentos graves (\`) 
+2. {r nome_do_pedaco},
+3. código em R, 
+4. e fechando com 3 acentos graves (\`)
+
+Por exemplo:
+
+````yaml
+```{r cars} # Chamando esse _chunk_ com código de R como 'cars' 
+head(cars) # Visualizando 6 linhas iniciais da base de dados 'cars'
+summary(cars) # Resumindo base de dados 'cars'
+```
+````
+
+output:
+
+
+```r
+head(cars) # Visualizando 6 linhas iniciais da base de dados 'cars'
+```
+
+```
+##   speed dist
+## 1     4    2
+## 2     4   10
+## 3     7    4
+## 4     7   22
+## 5     8   16
+## 6     9   10
+```
+
+```r
+summary(cars) # Resumindo base de dados 'cars'
+```
+
+```
+##      speed           dist       
+##  Min.   : 4.0   Min.   :  2.00  
+##  1st Qu.:12.0   1st Qu.: 26.00  
+##  Median :15.0   Median : 36.00  
+##  Mean   :15.4   Mean   : 42.98  
+##  3rd Qu.:19.0   3rd Qu.: 56.00  
+##  Max.   :25.0   Max.   :120.00
+```
+
+Também, no topo do quadrante sup-esq, é possível criar clicando no ícone "+C" e selecionando "R" (ou apertando Ctrl + Alt + I).
+
+
+
+### Incluindo Gráficos
+Você pode incluir gráficos no documento usando `plot()` dentro do _chunk_ com código R. Além disso, o parâmetro `echo = FALSE` retira do PDF/HTML gerado o _chunk_ de código, gerando apenas, neste caso, a figura.
+
+Por exemplo:
+
+````yaml
+```{r pressure, echo = FALSE}
+plot(pressure) # Gráfico da base de dados 'pressure'
+```
+````
+
+output:
+
+<img src="Monitorias_2022_files/figure-html/pressure-1.png" width="672" />
+
+*Ao invés de escrever `echo = FALSE`, é possível alterar a configuração do _chunk_ após criá-lo:<br/>  
+Ícone de Config > Output > Show output only
+
+
+### Formatação no R Markdown
+
+#### Bullets:
+````yaml
+- bullet 1
+- bullet 2
+- bullet 3
+````
+
+output:
+
+- bullet 1
+- bullet 2
+- bullet 3
+
+
+#### Formatação de texto:
+````yaml
+1. **negrito**
+2. *itálico* ou _itálico_
+3. link: <http://rmarkdown.rstudio.com>.
+4. [link R Markdown](http://rmarkdown.rstudio.com)
+5. destaque para `código em r`
+````
+
+output:
+
+1. **negrito**
+2. *itálico* ou _itálico_
+3. link: <http://rmarkdown.rstudio.com>.
+4. [link R Markdown](http://rmarkdown.rstudio.com)
+5. destaque para `código em r`
+
+
+
+#### Títulos de seções e subseções
+````yaml
+# Título - 1º Nível
+## Título - 2º Nível
+### Título - 3º Nível
+````
+
+
+### Quebra de texto
+Ao terminar de escrever uma linha ou parágrafo, é necessário apertar \<Enter\> duas vezes. Caso aperta apenas uma vez, o R Markdown considerará que o texto continua na mesma linha:
+```yaml
+Não pula linha
+Não pula linha
+
+Pula linha
+
+Pula linha
+
+```
+
+output:
+
+Não pula linha
+Não pula linha
+
+Pula linha
+
+Pula linha
+
+
+### Escrita em LaTeX
+Também é possível usar os códigos em LaTeX para escrever expressões matemáticas usando `$`:
+
+```yaml
+- Para incluir uma expressão LaTeX no meio do texto, como $\alpha + \beta + \gamma$,
+usa-se cifrão (`$`) único em cada lado.
+- Para destacar uma expressão, como $$\alpha + \beta + \gamma, \tag{1}$$ é necessário
+colocar 2 cifrões (`$`) de cada lado da expressão, assim como no LaTeX.
+```
+
+output:
+
+- Para incluir uma expressão em LaTeX no meio do texto, como $\alpha + \beta + \gamma$, usa-se cifrão (`$`) único em cada lado.
+- Para destacar uma expressão, como $$\alpha + \beta + \gamma, \tag{1}$$ é necessário colocar 2 cifrões (`$`) de cada lado da expressão, assim como no LaTeX.
+
+
+Para aprender a usar LaTeX:
+
+- Curso [_LaTeX for Students, Engineers and Scientists_ (edX)](www.edx.org/course/latex-for-students-engineers-and-scientists-2) (é possível cursar sem pagar - _audit course_)
+
+
+### Exportando documentos em outros formatos
+No código inicial do .Rmd, é possível alterar o formato exportado pelo documento:
+
+- para PDF: `output: pdf_document`
+- para HTML: `output: html_document`
+
+
+#### Templates para HTML
+Existem diversos templates para documentos HTML e, para utilizá-los, é preciso instalar
+o pacote `rmdsformats`
+
+```
+install.packages("rmdformats")
+```
+
+Após a instalação, teste:
+
+- `output: rmdformats::material`
+- `output: rmdformats::readthedown`
+- `output: rmdformats::downcute`
+- `output: rmdformats::robobook`
+- `output: rmdformats::html_clean`
+- `output: rmdformats::html_docco`
+
+# Operações e Objetos no R
+## Operações básicas
+
+```r
+# Soma
+1 + 1
+```
+
+```
+## [1] 2
+```
+
+```r
+# Subtração
+2 - 3
+```
+
+```
+## [1] -1
+```
+
+```r
+# Multiplicação
+2 * 3
+```
+
+```
+## [1] 6
+```
+
+```r
+# Divisão
+6 / 4
+```
+
+```
+## [1] 1.5
+```
+
+```r
+# Divisão Inteira
+6 %/% 4
+```
+
+```
+## [1] 1
+```
+
+```r
+# Resto da Divisão
+6 %% 4
+```
+
+```
+## [1] 2
+```
+
+```r
+# Potenciação
+2 ^ 3
+```
+
+```
+## [1] 8
+```
+
+```r
+8 ^ (1 / 3)
+```
+
+```
+## [1] 2
+```
+
+
+## Objetos no R
+ - [Data types, R objects and attributes (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/OS8hs/data-types-r-objects-and-attributes)
+ 
+Para criar um objeto, atribuímos algo (neste caso, um valor) a um nome por meio do operador de atribuição `<-` ou `=`:
+
+```r
+obj1 <- 5
+obj2 = 5 + 2
+```
+
+Note que ambos objetos foram criados e aparecem no quadrante superior/direito (_Environment_). Agora, podemos imprimir os seus valores executando o nome do objeto
+
+```r
+obj1
+```
+
+```
+## [1] 5
+```
+ou imprimindo explicitamente por meio da função `print()`:
+
+```r
+print(obj2)
+```
+
+```
+## [1] 7
+```
+
+Note que, podemos alterar um objeto atribuindo algo novo a ele:
+
+```r
+obj1 = obj2
+obj1
+```
+
+```
+## [1] 7
+```
+
+Uma forma bastante utilizada para alteração de valor de um objeto é utilizando o próprio valor de objeto como base:
+
+```r
+obj1 = obj1 + 3
+obj1
+```
+
+```
+## [1] 10
+```
+> Isto será especialmente relevante quando trabalharmos com repetições/loops.
+
+
+É possível visualizar o tipo de objeto usando a função `class()`:
+
+```r
+class(obj1)
+```
+
+```
+## [1] "numeric"
+```
+
+Logo, `obj1` é um número real. Há 5 tipos de classes de objetos "atômicos" (que contêm apenas 1 valor):
+
+ - `character`: texto
+ - `numeric`: número real
+ - `integer`: número inteiro
+ - `complex`: número complexo
+ - `logical`: verdadeiro/falso (1 ou 0)
+ 
+
+```r
+num_real = 3
+class(num_real)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+num_inteiro = 3L # para número inteiro, usar sufixo L
+class(num_inteiro)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+texto = "Oi"
+print(texto)
+```
+
+```
+## [1] "Oi"
+```
+
+```r
+class(texto)
+```
+
+```
+## [1] "character"
+```
+
+```r
+boolean = 2>1
+print(boolean)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+class(boolean)
+```
+
+```
+## [1] "logical"
+```
+
+```r
+boolean2 = T # poderia escrever TRUE 
+print(boolean2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+boolean3 = F # poderia escrever FALSE
+print(boolean3)
+```
+
+```
+## [1] FALSE
+```
+
+### Textos (_characters_/_strings_)
+- Só será abordado um conteúdo bem básico para trabalhar com texto.
+- Para mais conteúdo:
+    - [Editing text variables (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/drpnT/editing-text-variables)
+    - [Regular expressions I (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/bNiON/regular-expressions-i)
+    - [Regular expressions II (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/QvbWt/regular-expressions-ii)
+- Para extrair parte de um texto, usamos a função `substr()`
+```yaml
+substr(x, start, stop)
+
+x: a character vector.
+start: integer. The first element to be replaced.
+stop: integer. The last element to be replaced.
+```
+
+
+```r
+substr("shampoo", 1, 3) # extraindo caracteres 1 a 3 do texto
+```
+
+```
+## [1] "sha"
+```
+
+```r
+substr(110521, 4, 6) # também pode ser feito em números (torn-se texto)
+```
+
+```
+## [1] "521"
+```
+- Isto pode ser interessante, por exemplo, com códigos de localidades do IBGE:
+
+```r
+cod_distrito = 110001515 # Distrito de Filadélfia d'Oeste
+substr(cod_distrito, 1, 7) # Município de Alta Floresta d'Oeste
+```
+
+```
+## [1] "1100015"
+```
+
+```r
+substr(cod_distrito, 1, 2) # UF Rondônia
+```
+
+```
+## [1] "11"
+```
+- Eventualmente, uma base de dados pode vir com os códigos de UF, município e distrito de forma separada e precisamos juntar os códigos:
+
+```r
+cod_uf = 11
+cod_municipio = 15
+cod_distrito = 15
+```
+- No entanto, como o código parcial do município veio como número, precisamos adicionar uma certa quantidade de zeros na frente para ficar com 5 caracteres e ficar no padrão do IBGE. Para fazer isso, usamos a função `sprintf()` com a formatação `fmt="%05d"` (número com 5 dígitos)
+```yaml
+sprintf(fmt, ...)
+
+fmt: a character vector of format strings, each of up to 8192 bytes.
+...	: values to be passed into fmt. Only logical, integer, real and character vectors are supported, but some coercion will be done. Up to 100.
+```
+
+```r
+sprintf("%05d", cod_municipio)
+```
+
+```
+## [1] "00015"
+```
+- Agora, para juntar textos (podendo incluir números), usamos as funções `paste0()` e `paste()`. A diferença entre eles é que o `paste0()` não incluir um separador entre os textos, e o `paste()` inclui um separador (o padrão é um espaço):
+
+```r
+paste0(cod_uf, sprintf("%05d", cod_municipio), cod_distrito)
+```
+
+```
+## [1] "110001515"
+```
+
+```r
+paste(cod_uf, sprintf("%05d", cod_municipio), cod_distrito)
+```
+
+```
+## [1] "11 00015 15"
+```
+
+
+### Datas e horários
+- [Dates and times (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/yl7BO/dates-and-times)
+- [Working with dates (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/0rohY/working-with-dates)
+- R usa uma representação especial para datas e horários
+- Datas são representadas na classe `Date`
+    - São armazenadas internamente como _número de dias_ desde 1970-01-01
+    - Para transformar um texto em uma data, usamos a função `as.Date()`
+    
+
+```r
+x = as.Date("1970-01-01")
+class(x)
+```
+
+```
+## [1] "Date"
+```
+
+```r
+x
+```
+
+```
+## [1] "1970-01-01"
+```
+
+```r
+unclass(x) # Dia 0
+```
+
+```
+## [1] 0
+```
+
+```r
+unclass(as.Date("1969-12-31")) # Dia -1
+```
+
+```
+## [1] -1
+```
+
+- Horários são representadas na classe `POSIXct` (apenas um _integer_ bem grande) ou `POSIXlt` (_lista_ guarda mais informações - dia da semana, dia do ano, mês, dia do mês)
+     - São armazenadas internamente como _número de segundos_ desde:
+        - **1970**-01-01, se `POSIXct`
+        - **1900**-01-01, se `POSIXlt`
+
+
+```r
+## POSIXct
+x = as.POSIXct("1970-01-01")
+x
+```
+
+```
+## [1] "1970-01-01 -03"
+```
+
+```r
+class(x)
+```
+
+```
+## [1] "POSIXct" "POSIXt"
+```
+
+```r
+unclass(x) # Nº de segundos desde 1970-01-01 (dado fuso horário)
+```
+
+```
+## [1] 10800
+## attr(,"tzone")
+## [1] ""
+```
+
+```r
+## POSIXlt
+p = as.POSIXlt("1970-01-01")
+class(p)
+```
+
+```
+## [1] "POSIXlt" "POSIXt"
+```
+
+```r
+unclass(p) # informações desde 1900
+```
+
+```
+## $sec
+## [1] 0
+## 
+## $min
+## [1] 0
+## 
+## $hour
+## [1] 0
+## 
+## $mday
+## [1] 1
+## 
+## $mon
+## [1] 0
+## 
+## $year
+## [1] 70
+## 
+## $wday
+## [1] 4
+## 
+## $yday
+## [1] 0
+## 
+## $isdst
+## [1] 0
+## 
+## $zone
+## [1] "-03"
+## 
+## $gmtoff
+## [1] NA
+```
+
+
+### Expressões lógicas/booleanas
+São expressões que retornam o valor Verdadeiro ou Falso:
+
+```r
+class(TRUE)
+```
+
+```
+## [1] "logical"
+```
+
+```r
+class(FALSE)
+```
+
+```
+## [1] "logical"
+```
+
+```r
+T + F + T + F + F # soma de 1's (TRUE) e 0's (FALSE)
+```
+
+```
+## [1] 2
+```
+
+```r
+2 < 20
+```
+
+```
+## [1] TRUE
+```
+
+```r
+19 >= 19
+```
+
+```
+## [1] TRUE
+```
+
+```r
+100 == 10**2
+```
+
+```
+## [1] TRUE
+```
+
+```r
+100 != 20*5
+```
+
+```
+## [1] FALSE
+```
+
+É possível escrever expressões compostas utilizando `|` (ou) e `&` (e):
+
+```r
+x = 20
+x < 0 | x**2 > 100
+```
+
+```
+## [1] TRUE
+```
+
+```r
+x < 0 & x**2 > 100
+```
+
+```
+## [1] FALSE
+```
+
+> **Tabela de Precedência de Operadores**
+> 
+> - Nível 6 - potenciação: `^`
+> - Nível 5 - multiplicação: `*`, `/`, `%/%`, `%%`
+> - Nível 4 - adição: `+`, `-`
+> - Nível 3 - relacional: `==`, `!=`, `<=`, `>=`, `>`, `<`
+> - Nível 2 - lógico: `&` (e)
+> - Nível 1 - lógico: `|` (ou)
+
+
+### Vetores
+- [Data types - Vectors and lists (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/wkAHm/data-types-vectors-and-lists)
+
+Depois das 5 classes de objetos apresentadas acima, as mais básicas são os vetores e as listas, que possuem mais de um elemento dentro do objeto. Um vetor necessariamente exige que os elementos sejam da mesma classe. Podemos criar um vetor usando a função `c()` e incluindo os valores separados por `,`:
+
+```r
+x = c(0.5, 0.6) # numeric
+x = c(TRUE, FALSE) # logical
+x = c("a", "b", "c") # character
+x = 9:12 # integer (é igual a c(9, 10, 11, 12))
+x = c(1+0i, 2+4i) # complex
+```
+
+
+Também é possível criar um vetor "em branco" usando a função `vector()` e definindo a classe dos seus elementos junto de seu tamanho:
+
+```yaml
+vector(mode = "logical", length = 0)
+
+mode: character string naming an atomic mode or "list" or "expression" or (except for vector) "any". Currently, is.vector() allows any type (see typeof) for mode, and when mode is not "any", is.vector(x, mode) is almost the same as typeof(x) == mode.
+length: a non-negative integer specifying the desired length. For a long vector, i.e., length > .Machine$integer.max, it has to be of type "double". Supplying an argument of length other than one is an error
+```
+
+
+```r
+x = vector(mode="numeric", length=10)
+x
+```
+
+```
+##  [1] 0 0 0 0 0 0 0 0 0 0
+```
+
+Se utilizarmos a função `c()` com elementos de classes diferentes, o R transforma a classe do objeto para o "mais geral":
+
+```r
+y = c(1.7, "a") # (numeric, character) -> character
+class(y)
+```
+
+```
+## [1] "character"
+```
+
+```r
+y = c(FALSE, 0.75) # (logical, numeric) -> numeric
+class(y)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+y = c("a", TRUE) # (character, logical) -> character
+class(y)
+```
+
+```
+## [1] "character"
+```
+
+> **Note que**:
+>
+> character $>$ complex $>$ numeric $>$ integer $>$ logical
+
+Também podemos forçar a mudança de classe de objeto para a classe "menos geral", o que acaba transformando:
+
+- os elementos "mais gerais" em missing values (NA's),
+
+```r
+as.numeric(c(1.7, "a")) # (numeric, character)
+```
+
+```
+## Warning: NAs introduzidos por coerção
+```
+
+```
+## [1] 1.7  NA
+```
+
+```r
+as.logical(c("a", TRUE)) # (character, logical) 
+```
+
+```
+## [1]   NA TRUE
+```
+- [exceção] de _character_ com número (por exemplo, "9") para _numeric_: torna-se _numeric_
+
+```r
+as.numeric(c(1.7, "9")) # (numeric, character número)
+```
+
+```
+## [1] 1.7 9.0
+```
+- [exceção] de _numeric_ diferente de zero para _logical_: torna-se TRUE
+- [exceção] de _numeric_ igual a zero para _logical_: torna-se FALSE
+
+```r
+as.logical(c(FALSE, 0.75, -10)) # (logical, numeric > 0, numeric < 0)
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+
+```r
+as.logical(c(TRUE, 0)) # (logical, numeric zero) 
+```
+
+```
+## [1]  TRUE FALSE
+```
+- [exceção] de _character_ lógico ("TRUE", "T", "FALSE", "F") para _logical_: torna-se _logical_ ("0" e "1" tornam-se NA)
+
+```r
+as.logical(c("T", "FALSE", "1", TRUE)) # (character TRUE/FALSE, logical) 
+```
+
+```
+## [1]  TRUE FALSE    NA  TRUE
+```
+
+#### Construção de vetor de sequência
+- Uma forma interessante de construir um vetor numérico com uma sequência é utilizando a função `seq()`
+
+```yaml
+seq(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
+    length.out = NULL, ...)
+
+from, to: the starting and (maximal) end values of the sequence. Of length 1 unless just from is supplied as an unnamed argument.
+by:	number, increment of the sequence.
+length.out: desired length of the sequence. A non-negative number, which for seq and seq.int will be rounded up if fractional.
+```
+- Note que todos argumentos já possuem valores pré-definidos, então podemos montar sequências de maneiras distintas.
+- Considerando o preenchimento dos argumentos `from` e `to`, podemos:
+    - definir `by` para dar um valor de quanto varia entre um elemento e outro, ou
+    - definir `length.out` (ou simplesmente `length`) para informar a quantidade de elementos que terá na sequência
+
+```r
+seq(from=0, to=10, by=2)
+```
+
+```
+## [1]  0  2  4  6  8 10
+```
+
+```r
+seq(from=0, to=10, length=5)
+```
+
+```
+## [1]  0.0  2.5  5.0  7.5 10.0
+```
+
+#### Construção de vetor com elementos repetidos
+- Podemos construir vetores com elementos repetidos usando a função `rep()`
+```yaml
+rep(x, times)
+
+x: a vector (of any mode including a list) or a factor or (for rep only) a POSIXct or POSIXlt or Date object.
+```
+
+```r
+rep(0, 10) # repetição de 10 zeros
+```
+
+```
+##  [1] 0 0 0 0 0 0 0 0 0 0
+```
+
+```r
+rep(c("a", "b"), 2) # repetição do vetor c("a", "b")
+```
+
+```
+## [1] "a" "b" "a" "b"
+```
+
+### Listas
+Já uma lista permite que os valores pertençam a classes distintas, inclusive podendo conter um vetor como elemento. Ela pode ser criada por meio da função `list()`:
+
+```r
+x = list(1, "a", TRUE, 1+4i, c(0.5, 0.6))
+x
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] "a"
+## 
+## [[3]]
+## [1] TRUE
+## 
+## [[4]]
+## [1] 1+4i
+## 
+## [[5]]
+## [1] 0.5 0.6
+```
+
+```r
+class(x)
+```
+
+```
+## [1] "list"
+```
+
+
+### Matrizes
+Matrizes são vetores (e, portanto, possuem elementos de mesma classe) com atributo de _dimensão_ (nº linhas por nº colunas). Uma matriz pode ser criada usando a função `matrix()`:
+
+```yaml
+matrix(data = NA, nrow = 1, ncol = 1, byrow = FALSE, ...)
+
+data: an optional data vector (including a list or expression vector). Non-atomic classed R objects are coerced by as.vector and all attributes discarded.
+nrow: the desired number of rows.
+ncol: the desired number of columns.
+byrow: logical. If FALSE (the default) the matrix is filled by columns, otherwise the matrix is filled by rows.
+```
+
+
+```r
+m = matrix(nrow=2, ncol=3)
+m
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]   NA   NA   NA
+## [2,]   NA   NA   NA
+```
+
+É possível construir uma matriz "preenchida" informando os seus (nº linhas $\times$ nº colunas) valores por meio de um vetor. Os elementos deste vetor preenchem primeiro todas linhas de uma coluna para, depois, preencher a próxima coluna (_column-wise_):
+
+```r
+m = matrix(1:6, nrow=2, ncol=3)
+m
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+```
+
+> **ATENÇÃO**: No Python, você informa os valores da matriz por linha (_row-wise_).
+
+Outra maneira de criar matrizes é juntando vetores em colunas (_column-binding_) ou em linhas (_row-binding_), usando as funções `cbind()` e `rbind()`, respectivamente:
+
+```yaml
+cbind(...)
+rbind(...)
+
+... : (generalized) vectors or matrices. These can be given as named arguments. Other R objects may be coerced as appropriate, or S4 methods may be used: see sections ‘Details’ and ‘Value’. (For the "data.frame" method of cbind these can be further arguments to data.frame such as stringsAsFactors.)
+```
+
+
+```r
+x = 1:3
+y = 10:12
+
+cbind(x, y)
+```
+
+```
+##      x  y
+## [1,] 1 10
+## [2,] 2 11
+## [3,] 3 12
+```
+
+```r
+rbind(x, y)
+```
+
+```
+##   [,1] [,2] [,3]
+## x    1    2    3
+## y   10   11   12
+```
+
+
+### Fatores
+- [Data types - Factors (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/Eidkq/data-types-factors)
+
+- _Factor_ é uma classe de objeto que representa uma variável categórica, em que cada possível valor é considerado uma categoria/nível (_level_) distinto.
+- Por exemplo, ao usar factor em uma variável de sexo/gênero, os valores "masculino" e "feminino" podem ser considerados como níveis (_levels_) 1 e 2, por exemplo.
+- Isso é especialmente interessante em regressões (via `lm()` ou `glm()`), pois
+    - quando esse _factor_ é colocado como variável explicativa, o R já considera cada nível como uma _dummy_, e
+    - para evitar multicolinearidade perfeita, retira-se automaticamente o 1º nível (no exemplo, portanto, manteria apenas uma _dummy_ de "feminino" na regressão).
+- Para criar um _factor_, usa-se a função `factor()`
+```yaml
+factor(x = character(), levels, ...)
+
+x: a vector of data, usually taking a small number of distinct values.
+levels: an optional vector of the unique values (as character strings) that x might have taken. The default is the unique set of values taken by as.character(x), sorted into increasing order of x. Note that this set can be specified as smaller than sort(unique(x)).
+```
+
+
+```r
+texto = c("yes", "yes", "no", "maybe", "yes", "no")
+x = factor(texto)
+x
+```
+
+```
+## [1] yes   yes   no    maybe yes   no   
+## Levels: maybe no yes
+```
+
+```r
+unclass(x) # Visualizar como o factor é representado em níveis
+```
+
+```
+## [1] 3 3 2 1 3 2
+## attr(,"levels")
+## [1] "maybe" "no"    "yes"
+```
+
+- Note que, quando transformamos o vetor `texto` em factor, considerou automaticamente que "maybe" é o 1º nível, "no" é o 2º nível e "yes" é o 3º nível.
+- Eventualmente, queremos definir "yes" como 1º nível do _factor_ para que, por exemplo, seja o nível desconsiderado numa regressão (para evitar multicolinearidade perfeita).
+- Para isto, podemos usar incluir o argumento `levels = ...` quando transformar um vetor em _factor_ usando a função `factor`
+- Ou, também, utilizar a função `relevel()` em um _factor_ existente
+
+```yaml
+relevel(x, ref, ...)
+
+x: an unordered factor.
+ref: the reference level, typically a string.
+```
+
+
+```r
+y = factor(texto, levels=c("yes", "no", "maybe"))
+unclass(y)
+```
+
+```
+## [1] 1 1 2 3 1 2
+## attr(,"levels")
+## [1] "yes"   "no"    "maybe"
+```
+
+```r
+x = relevel(x, ref="yes")
+unclass(x)
+```
+
+```
+## [1] 1 1 3 2 1 3
+## attr(,"levels")
+## [1] "yes"   "maybe" "no"
+```
+
+
+### Data frames
+- [Data types - Data frames (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/kz1Lh/data-types-data-frames)
+
+- É um tipo especial de lista, em que cada elemento da lista possui o mesmo tamanho
+- Cada elemento da lista pode ser entendida como uma coluna de uma base de dados
+- Diferente de matrizes, cada elemento de um _data frame_ pode ser de uma classe diferente 
+- Normalmente é criada automaticamente ao carregarmos uma base de dados em .txt ou .csv via `read.table()` ou `read.csv()`
+- Mas também pode ser criada manualmente via `data.frame()`
+
+```yaml
+data.frame(..., stringsAsFactors = FALSE)
+
+... : these arguments are of either the form value or tag = value. Component names are created based on the tag (if present) or the deparsed argument itself.
+stringsAsFactors: logical: should character vectors be converted to factors?.
+```
+
+
+```r
+x = data.frame(foo=1:4, bar=c(T, T, F, F))
+x
+```
+
+```
+##   foo   bar
+## 1   1  TRUE
+## 2   2  TRUE
+## 3   3 FALSE
+## 4   4 FALSE
+```
+
+```r
+nrow(x) # Número de linhas de x
+```
+
+```
+## [1] 4
+```
+
+```r
+ncol(x) # Número de colunas de x
+```
+
+```
+## [1] 2
+```
+
+
+#### Importando data frames
+- [Reading tabular data (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/bQ5B9/reading-tabular-data)
+- Para leitura de base de dados, as funções mais utilizadas são `read.table()` e `read.csv()`
+- O `read.table()` tem o seguinte argumentos (que também podem ser visto nas demais funções de leitura de base de dados):
+    - `file`: caminho/endereço do arquivo, incluindo a sua extensão
+    - `header`: `TRUE` ou `FALSE` indicando se a 1ª linha da base de dados é um cabeçalho
+    - `sep`: indica como as colunas são separadas
+    - `stringAsFactors`: `TRUE` ou `FALSE` se as variáveis de texto devem ser transformadas em _factors_.
+```r
+data_txt = read.table("mtcars.txt") # também lê .csv
+data_csv = read.csv("mtcars.csv")
+```
+- Caso queira testar, faça download das bases: [mtcars.txt](https://fhnishida.github.io/fearp/eco1/mtcars.txt) e [mtcars.csv](https://fhnishida.github.io/fearp/eco1/mtcars.csv)
+- Note que, caso você não tenha definido o diretório de trabalho, é necessário informar o caminho/endereço inteiro do arquivo que você quer importar:
+```r
+data = read.table("C:/Users/Fabio/OneDrive/FEA-RP/mtcars.csv")
+```
+- `read.csv()` é igual ao `read.table()`, mas considera como padrão que o separador de colunas é a vírgula (`sep = ","`)
+- Para gravar uma base de dados, utilizamos as funções `write.csv()` e `write.table()`, nas quais informamos um data frame e o nome do arquivo (junto de sua extensão).
+
+
+#### Importando em outros formatos
+- Para abrir arquivos em Excel, nos formatos .xls e xlsx, é necessário utilizar o [pacote `xlsx`](https://cran.r-project.org/web/packages/xlsx/xlsx.pdf)
+```r
+read.xlsx("mtcars.xlsx", sheetIndex=1) # Lendo a 1ª aba do arquivo Excel
+```
+Caso queira testar, faça download da base [mtcars.xlsx](https://fhnishida.github.io/fearp/eco1/mtcars.xlsx)
+- Para abrir arquivos de SPSS, Stata e SAS, é necessário utilizar o pacote `haven` e, respectivamente, as funções `read_spss()`, `read_dta()` e `read_sas()`
+
+> Note que no padrão do R, o separador decimal é o ponto (`.`), enquanto no padrão brasileiro usa-se vírgula.
+>
+> Isso pode gerar importação equivocada dos valores, caso o .csv ou o .xlsx tenham sido gerados no padrão brasileiro.
+>
+> Para contornar este problema, utilize as funções de importação `read.csv2()` e `read.xlsx2()` para que os dados sejam lidos a partir do padrão brasileiro e os dados sejam importados corretamente
+> Caso queira testar, faça download das bases: [mtcars_br.csv](https://fhnishida.github.io/fearp/eco1/mtcars_br.csv) e [mtcars_br.xlsx](https://fhnishida.github.io/fearp/eco1/mtcars_br.xlsx)
+
+
+## Subconjuntos de objetos
+- [Subsetting - Basics (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/JDoLX/subsetting-basics)
+- Há 3 operadores básicos para extrair subconjuntos de objetos no R:
+    - `[]`: retorna um "sub-objeto" da mesma classe do objeto original
+    - `[[]]`: usado para extrair elementos de uma lista ou data frame, em que o "sub-objeto" não é necessariamente da mesma classe do objeto original
+    - `$`: usado para extrair elemento de uma lista ou data frame pelo nome
+
+
+### Subconjunto de vetores
+
+```r
+x = c(1, 2, 3, 3, 4, 1)
+x[1] # extraindo o 1º elemento de x
+```
+
+```
+## [1] 1
+```
+
+```r
+x[1:4] # extraindo do 1º ao 4º elemento de x
+```
+
+```
+## [1] 1 2 3 3
+```
+
+> **ATENÇÃO**: Diferente do Python, em que a numeração se inicia no 0, a numeração dos elementos no R se inicia no 1.
+
+- Note que, ao fazer uma expressão lógica com um vetor, obtemos um outro vetor, chamado de _índice lógico_
+
+```r
+x > 1
+```
+
+```
+## [1] FALSE  TRUE  TRUE  TRUE  TRUE FALSE
+```
+- Usando o operador `[]`, podemos extrair um subconjunto do vetor `x` usando uma condição. Por exemplo, vamos extrair apenas valores maiores do que 1:
+
+```r
+x[x > 1]
+```
+
+```
+## [1] 2 3 3 4
+```
+
+```r
+x[c(F, T, T, T, T, F)] # Equivalente ao x[x > 1] - Extrair apenas TRUE's
+```
+
+```
+## [1] 2 3 3 4
+```
+
+### Subconjunto de listas
+- [Subsetting - Lists (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/hVKHm/subsetting-lists)
+- Note que, diferente do vetor, para acessar um valor/elemento de uma lista é necessário utilizar `[[]]` com o número da posição do elemento da lista
+
+```r
+x = list(foo=1:4, bar=0.6)
+x
+```
+
+```
+## $foo
+## [1] 1 2 3 4
+## 
+## $bar
+## [1] 0.6
+```
+
+```r
+x[1] # retorna uma lista $foo
+```
+
+```
+## $foo
+## [1] 1 2 3 4
+```
+
+```r
+class(x[1])
+```
+
+```
+## [1] "list"
+```
+
+```r
+x[[1]] # retorna um vetor de classe numeric
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+class(x[[1]])
+```
+
+```
+## [1] "integer"
+```
+- Se quiser acessar um elemento dentro deste elemento da lista, precisa ser seguido por `[]`
+
+```r
+x[[1]][2]
+```
+
+```
+## [1] 2
+```
+
+```r
+x[[2]][1]
+```
+
+```
+## [1] 0.6
+```
+- Também podemos usar o nome para extrair um subconjunto do objeto
+
+```r
+x[["foo"]]
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+x$foo
+```
+
+```
+## [1] 1 2 3 4
+```
+
+
+### Subconjunto de matrizes e de data frames
+- [Subsetting - Matrices (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/4gSc1/subsetting-matrices)
+- Para extrair um pedaço de uma matriz ou de um data frame, indicamos as linhas e as colunas dentro do operador `[]`
+
+```r
+x = matrix(1:6, 2, 3)
+x
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+```
+
+```r
+x[1, 2] # linha 1 e coluna 2 da matriz x
+```
+
+```
+## [1] 3
+```
+
+```r
+x[1:2, 2:3] # linha 1 e colunas 2 e 3 da matriz x
+```
+
+```
+##      [,1] [,2]
+## [1,]    3    5
+## [2,]    4    6
+```
+- É possível selecionar linhas/colunas usando um vetor lógico (`TRUE`'s e `FALSE`'s) de mesmo comprimento da dimensão:
+
+```r
+x[, c(F, T, T)] # vet. lógico selecionando as 2 últimas colunas
+```
+
+```
+##      [,1] [,2]
+## [1,]    3    5
+## [2,]    4    6
+```
+- Podemos selecionar linhas ou colunas inteiras ao não informar os índices:
+
+```r
+x[1, ] # linha 1 e todas colunas
+```
+
+```
+## [1] 1 3 5
+```
+
+```r
+x[, 2] # todas linhas e coluna 2
+```
+
+```
+## [1] 3 4
+```
+- Note que, quando o subconjunto é um valor único ou um vetor, o objeto retornado deixa de ser uma matriz. Podemos forçar a se manter como matriz usando o argumento `drop= FALSE`
+
+```r
+x[1, 2, drop = FALSE]
+```
+
+```
+##      [,1]
+## [1,]    3
+```
+
+### Removendo valores ausentes (_missing values_ - `NA`)
+- [Subsetting - Removing missing values (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/Qy8bH/subsetting-removing-missing-values)
+- Remover dados faltantes é uma ação comum quando manipulamos bases de dados
+- Para verificar quais dados são `NA`, usa-se a função `is.na()`
+
+```r
+x = c(1, 2, NA, 4, NA, NA)
+is.na(x)
+```
+
+```
+## [1] FALSE FALSE  TRUE FALSE  TRUE  TRUE
+```
+
+```r
+sum(is.na(x)) # qtd de missing values
+```
+
+```
+## [1] 3
+```
+- Relembre que o operador `!` nega uma expressão e, portanto, `!is.na()` nos resulta os elementos que **não** são ausentes
+
+```r
+x[ !is.na(x) ]
+```
+
+```
+## [1] 1 2 4
+```
+
+
+## Operações vetoriais/matriciais
+- [Vectorized operations (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/nobfZ/vectorized-operations)
+- Ao utilizar as operações matemáticas convencionais em vetores, cada elemento é operacionalizado com o elemento na mesma posição do outro vetor
+
+```r
+x = 1:4
+y = 6:9
+
+x + y # soma de cada elemento na mesma posição
+```
+
+```
+## [1]  7  9 11 13
+```
+
+```r
+x + 2 # soma de de cada elemento com um mesmo escalar
+```
+
+```
+## [1] 3 4 5 6
+```
+
+```r
+x * y # multiplicação de cada elemento na mesma posição
+```
+
+```
+## [1]  6 14 24 36
+```
+
+```r
+x / y # divisão de cada elemento na mesma posição
+```
+
+```
+## [1] 0.1666667 0.2857143 0.3750000 0.4444444
+```
+- Para fazer o produto vetorial usa-se `%*%`. Por padrão, o R considera que o 1º vetor é um vetor-linha e o 2º é um vetor-coluna.
+
+```r
+x %*% y
+```
+
+```
+##      [,1]
+## [1,]   80
+```
+- Para transpor um vetor ou uma matriz, pode-se transformar em um vetor linha ou coluna via `matrix()`, ou é possível transpor usando  a função `t()`.
+
+```r
+x %*% t(y) # x vetor-coluna / y vetor-linha
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    6    7    8    9
+## [2,]   12   14   16   18
+## [3,]   18   21   24   27
+## [4,]   24   28   32   36
+```
+
+```r
+# Transformando vetores em objetos matriz
+x_col = matrix(x, ncol=1)
+x_col
+```
+
+```
+##      [,1]
+## [1,]    1
+## [2,]    2
+## [3,]    3
+## [4,]    4
+```
+
+```r
+y_lin = matrix(y, nrow=1)
+y_lin
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    6    7    8    9
+```
+
+```r
+x_col %*% y_lin
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    6    7    8    9
+## [2,]   12   14   16   18
+## [3,]   18   21   24   27
+## [4,]   24   28   32   36
+```
+- O mesmo é válido para matrizes:
+
+```r
+x = matrix(1:4, nrow=2, ncol=2)
+x
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    3
+## [2,]    2    4
+```
+
+```r
+y = matrix(rep(10, 4), nrow=2, ncol=2)
+y
+```
+
+```
+##      [,1] [,2]
+## [1,]   10   10
+## [2,]   10   10
+```
+
+```r
+x + y # Soma de elementos na mesma posição
+```
+
+```
+##      [,1] [,2]
+## [1,]   11   13
+## [2,]   12   14
+```
+
+```r
+x + 2 # Soma de cada elemento da matriz com um mesmo escalar
+```
+
+```
+##      [,1] [,2]
+## [1,]    3    5
+## [2,]    4    6
+```
+
+```r
+x * y # Multiplicação de elementos na mesma posição
+```
+
+```
+##      [,1] [,2]
+## [1,]   10   30
+## [2,]   20   40
+```
+
+```r
+x %*% y # Multplicação matricial
+```
+
+```
+##      [,1] [,2]
+## [1,]   40   40
+## [2,]   60   60
+```
+
+> Note que essas operações matemáticas são equivalentes às realizadas apenas quando as matrizes são transformadas em `numpy.array` no Python.
+
+
+## Estatísticas básicas
+- **Valores Absolutos**: `abs()`
+
+```r
+x = c(1, 4, -5, 2, 8, -2, 4, 7, 8, 0, 2, 3, -5, 7, 4, -4, 2, 5, 2, -3)
+x
+```
+
+```
+##  [1]  1  4 -5  2  8 -2  4  7  8  0  2  3 -5  7  4 -4  2  5  2 -3
+```
+
+```r
+abs(x)
+```
+
+```
+##  [1] 1 4 5 2 8 2 4 7 8 0 2 3 5 7 4 4 2 5 2 3
+```
+- **Soma**: `sum(..., na.rm = FALSE)`
+
+```r
+sum(x)
+```
+
+```
+## [1] 40
+```
+- **Média**: `mean(x, trim = 0, na.rm = FALSE, ...)`
+
+```r
+mean(x)
+```
+
+```
+## [1] 2
+```
+- **Desvio Padrão**: `sd(x, na.rm = FALSE)`
+
+```r
+sd(x)
+```
+
+```
+## [1] 4.129483
+```
+- **Quantis**: `quantile(x, probs = seq(0, 1, 0.25), na.rm = FALSE, ...)`
+
+```r
+# Mínimo, 1º Quartil, Mediana, 3º Quartil e Máximo
+quantile(x, probs=c(0, .25, .5, .75, 1))
+```
+
+```
+##    0%   25%   50%   75%  100% 
+## -5.00 -0.50  2.00  4.25  8.00
+```
+- **Máximo** e **Mínimo**: `max(..., na.rm = FALSE)` e `min(..., na.rm = FALSE)`
+
+```r
+# Mínimo, 1º Quartil, Mediana, 3º Quartil e Máximo
+max(x) # Valor máximo
+```
+
+```
+## [1] 8
+```
+
+```r
+min(x) # Valor mínimo
+```
+
+```
+## [1] -5
+```
+- A obtenção dos valores máximos e mínimos também poderia ser feita usando as funções `which.max()` e `which.min()`, que retornam **o índice do 1º elemento** de valor máximo/mínimo a partir de um **vetor de números**:
+
+```r
+which.max(x) # 1º índice de valor máximo
+```
+
+```
+## [1] 5
+```
+
+```r
+which.min(x) # 1º índice de valor mínimo
+```
+
+```
+## [1] 3
+```
+
+```r
+x[which.max(x)] # extraindo o valor máximo do vetor x
+```
+
+```
+## [1] 8
+```
+- Para obter os índices de todos os elementos de valor máximo/mínimo, precisamos usar a função `which()` que tem como argumento um **vetor lógico** (de `TRUE`'s e `FALSE`'s) como input, e gera um vetor de índices:
+```yaml
+which(x, ...)
+    
+x: a logical vector or array. NAs are allowed and omitted (treated as if FALSE).
+```
+
+```r
+x == max(x) # vetor lógico (TRUE's são os máximos)
+```
+
+```
+##  [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
+## [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+```
+
+```r
+which(x == max(x)) # vetor de índices de elementos com valores máximos
+```
+
+```
+## [1] 5 9
+```
+
+```r
+x[which(x == max(x))] # valores máximos
+```
+
+```
+## [1] 8 8
+```
+- Note que, se houve valores ausentes (`NA`), a função retorna `NA` por padrão. Para excluir os valores ausentes, precisamos definir o argumento `na.rm = TRUE`:
+
+```r
+x = c(1, 4, -5, 2, NA, -2, 4, 7, NA, 0, 2, 3, -5, NA, 4, -4, NA, 5, 2, NA)
+mean(x) # Sem excluir valores ausentes
+```
+
+```
+## [1] NA
+```
+
+```r
+mean(x, na.rm=TRUE) # Excluindo valores ausentes
+```
+
+```
+## [1] 1.2
+```
+
+# Estruturas de controle
+- Estruturas de controle no R permitem o controle do fluxo do programa
+
+## Estrutura condicional (`if`/`else`)
+- [Control structures - If/Else (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/PDOOA/control-structures-if-else)
+
+```r
+x = 5
+if (x > 10) {
+    y = 10
+    print("caso x > 10")
+} else if (x > 0) {
+    y = 5
+    print("caso 10 >= x > 0")
+} else {
+    y = 0
+    print("caso x >= 0")
+}
+```
+
+```
+## [1] "caso 10 >= x > 0"
+```
+
+```r
+y
+```
+
+```
+## [1] 5
+```
+
+- Essa mesma estrutura também pode ser utilizada para atribuir valor a um objeto
+
+```r
+x = 5
+y = if (x > 10) {
+    10
+} else if (x > 0) {
+    5
+} else {
+    0
+}
+y
+```
+
+```
+## [1] 5
+```
+- mas existem funções mais práticas para atribuir valor a um objeto a partir de uma condição:
+    - função `ifelse()` (útil para 2 possíveis valores)
+    
+```yaml
+ifelse(test, yes, no)
+
+test: an object which can be coerced to logical mode.
+yes: return values for true elements of test.
+no: return values for false elements of test.
+```
+
+
+```r
+x = 5
+y = ifelse(x > 10, yes=10, no=5)
+y
+```
+
+```
+## [1] 5
+```
+
+- função `case_when()` do pacote `dplyr` (útil para mais do que 2 possíveis valores)
+
+```yaml
+case_when(...)
+
+... : A sequence of two-sided formulas. The left hand side (LHS) determines which values match this case. The right hand side (RHS) provides the replacement value.
+```
+    
+
+```r
+x = 5
+y = dplyr::case_when(
+    x > 10 ~ 10,
+    x >  0 ~  5,
+    TRUE   ~  0  # Else
+)
+y
+```
+
+```
+## [1] 5
+```
+
+- note que, no `case_when()`, se não deixarmos claros todas os possíveis casos e, por acaso, cair num caso não declarado, a função retorna o valor `NA`
+    
+
+```r
+x = 5
+y = dplyr::case_when(
+    x > 10 ~ 10,
+    x <= 0 ~  0
+)
+y
+```
+
+```
+## [1] NA
+```
+
+## Estrutura de repetição/loop (`for`)
+- [Control structures - For loops (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/baydC/control-structures-for-loops)
+- A repetição usando `for` exige que você insira um vetor e defina um nome para a variável de indicação
+
+```r
+for(i in 3:7) {
+    print(i)
+}
+```
+
+```
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+```
+- Acima, nomeamos a variável de indicação como `i` e inserimos um vetor de números inteiros entre 3 e 7.
+- A cada _iteração_ (loop) é atribuído ao `i` um valor do vetor `3:7`, até "acabarem" todos os elementos do vetor
+- Sequências são interessantes para incluir em repetições utilizando `for`
+
+```r
+sequencia = seq(1, 5, length.out=11)
+sequencia
+```
+
+```
+##  [1] 1.0 1.4 1.8 2.2 2.6 3.0 3.4 3.8 4.2 4.6 5.0
+```
+
+```r
+for (val in sequencia) {
+    print(val^2)
+}
+```
+
+```
+## [1] 1
+## [1] 1.96
+## [1] 3.24
+## [1] 4.84
+## [1] 6.76
+## [1] 9
+## [1] 11.56
+## [1] 14.44
+## [1] 17.64
+## [1] 21.16
+## [1] 25
+```
+
+## Estrutura de repetição/loop (`while`)
+- [Control structures - While loops (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/WWXg6/control-structures-while-loops)
+- Diferente do `for`, a repetição via `while` exige que uma variável de indicação já esteja criada previamente antes de entrar no loop
+- Isto se dá, pois os loops (inclusive o primeiro) só serão realizados se uma condição for verdadeira
+- Note que, por não seguir uma sequência de elemento dentro de um vetor (como no `for`), **é necessário que a variável indicadora seja atualizada a cada iteração para que a repetição não seja feita infinitamente**.
+- Um forma comum de executar o `while` é definindo a variável de indicação como um contador, isto é, ir contando a quantidade de loops realizados e parar em uma determinada quantidade
+
+```r
+contador = 0
+
+while (contador <= 10) {
+    print(contador)
+    contador = contador + 1
+}
+```
+
+```
+## [1] 0
+## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10
+```
+- Uma outra maneira é, ao invés de aumentar em uma unidade por loop, a variável indicadora ser calculada e ela convergir ou ultrapassar algum limite. No exemplo abaixo, a cada loop da `distancia` diminuirá pela metade e irá parar num valor bem próximo de 0 (algum valor menor do que $10^{-3}$)
+
+```r
+distancia = 10
+tolerancia = 1e-3
+tolerancia
+```
+
+```
+## [1] 0.001
+```
+
+```r
+while (distancia > tolerancia) {
+    distancia = distancia / 2
+}
+
+distancia
+```
+
+```
+## [1] 0.0006103516
+```
+
+
+## Repetições encaixadas
+- É comum o uso de uma estrutura de repetição dentro de outra estrutura de repetição.
+- Como exemplo, será criada uma matriz vazia e esta será preenchida com a tabela de tabuada
+
+
+```r
+tabuada = matrix(NA, 10, 10)
+tabuada
+```
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+```
+
+```r
+# Preenchimento da matriz de tabuada
+for (linha in 1:10) {
+    for (coluna in 1:10) {
+        tabuada[linha, coluna] = linha * coluna
+    }
+}
+tabuada
+```
+
+```
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]    1    2    3    4    5    6    7    8    9    10
+##  [2,]    2    4    6    8   10   12   14   16   18    20
+##  [3,]    3    6    9   12   15   18   21   24   27    30
+##  [4,]    4    8   12   16   20   24   28   32   36    40
+##  [5,]    5   10   15   20   25   30   35   40   45    50
+##  [6,]    6   12   18   24   30   36   42   48   54    60
+##  [7,]    7   14   21   28   35   42   49   56   63    70
+##  [8,]    8   16   24   32   40   48   56   64   72    80
+##  [9,]    9   18   27   36   45   54   63   72   81    90
+## [10,]   10   20   30   40   50   60   70   80   90   100
+```
+
+
+# Simulação
+<!-- Funções para distribuições de probabilidade no R: -->
+
+<!-- - `rnorm`: gera amostra aleatória normal, dada uma média e dado um desvio padrão -->
+<!-- - `dnorm`: avalia a densidade de probabilidade normal (dada média e desvio padrão) em um ponto (ou num vetor de pontos) -->
+<!-- - `pnorm`: avalia a função de distribuição acumulada para uma distribuição normal -->
+<!-- - `rpois`: gera amostra aleatória Poisson, dada uma taxa -->
+
+## Geração de números aleatórios
+Para cada função de distribuição de probabilidade (Normal, Poisson, Binomial, Exponencial, Gamma, etc.), há normalmente quatro funções associadas que utilizam os seguintes prefixos:
+
+- `d`: densidade
+- `r`: geração de números aleatórios
+- `p`: distribuição acumulada
+- `q`: quantil
+
+Portanto, para a distribuição normal, temos as seguintes funções:
+```yaml
+dnorm(x, mean = 0, sd = 1, log = FALSE)
+pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+rnorm(n, mean = 0, sd = 1)
+
+x, q: vector of quantiles.
+p: vector of probabilities.
+n: number of observations. If length(n) > 1, the length is taken to be the number required.
+mean: vector of means.
+sd: vector of standard deviations.
+log, log.p: logical; if TRUE, probabilities p are given as log(p).
+lower.tail: logical; if TRUE (default), probabilities are P[X ≤ x] otherwise, P[X > x].
+```
+- Para reproduzir resultados, podemos usar a função `set.seed()` que, dado um número inteiro, faz com que a função `rnorm()` sempre gere os mesmos número aleatórios.
+
+```r
+# definindo seed
+set.seed(2022)
+rnorm(5)
+```
+
+```
+## [1]  0.9001420 -1.1733458 -0.8974854 -1.4445014 -0.3310136
+```
+
+```r
+# sem definir seed
+rnorm(5)
+```
+
+```
+## [1] -2.9006290 -1.0592557  0.2779547  0.7494859  0.2415825
+```
+
+```r
+# definindo seed
+set.seed(2022)
+rnorm(5)
+```
+
+```
+## [1]  0.9001420 -1.1733458 -0.8974854 -1.4445014 -0.3310136
+```
+
+
+### Simulando um modelo linear
+- [Simulating a linear model (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/u7in9/simulation-simulating-a-linear-model)
+- Suponha o modelo linear:
+$$ y = 0,5 + 2x + \varepsilon, \qquad \varepsilon \sim N(0, 2^2) $$
+- Assuma também que $x \sim N(0, 1^2), \beta_0 = 0.5$ e $\beta_1 = 2$:
+
+```r
+set.seed(2022)
+x = rnorm(100)
+e = rnorm(100, 0, 2)
+
+y = 0.5 + 2*x + e
+head(y, 10)
+```
+
+```
+##  [1]  1.864507212 -4.281986960 -2.803127733 -2.006542439  1.932538373
+##  [6] -3.121601205 -0.227562617  0.007171963  2.527003695  3.465565859
+```
+
+```r
+summary(y) # resumo da variável y
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -5.8760 -1.9534  0.5354  0.3737  2.6069  7.4756
+```
+
+```r
+plot(x, y) # Figura de x contra y
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-75-1.png" width="672" />
+
+
+## Amostragem aleatória
+- [Simulation - Random sampling (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/ykXUb/simulation-random-sampling)
+- Para fazer uma amostragem a partir de um dado vetor, usamos a função `sample()`
+```yaml
+sample(x, size, replace = FALSE, prob = NULL)
+
+x: either a vector of one or more elements from which to choose, or a positive integer. See ‘Details.’
+n: a positive number, the number of items to choose from.
+size: a non-negative integer giving the number of items to choose.
+replace: should sampling be with replacement?
+prob: a vector of probability weights for obtaining the elements of the vector being sampled.
+```
+
+```r
+set.seed(2022)
+sample(1:10, 4) # Amostragem definindo seed
+```
+
+```
+## [1] 4 3 6 7
+```
+
+```r
+sample(1:10, 4) # Amostragem sem definir seed
+```
+
+```
+## [1] 4 6 7 9
+```
+
+```r
+sample(letters, 5) # Amostragem de 5 letras
+```
+
+```
+## [1] "i" "n" "x" "g" "r"
+```
+
+```r
+sample(1:10) # Permutação (amostra mesma qtd de elementos do vetor)
+```
+
+```
+##  [1]  7  6  5  1  3 10  2  4  8  9
+```
+
+```r
+sample(1:10, replace = TRUE) # Amostragem com reposição
+```
+
+```
+##  [1] 6 7 6 5 4 8 3 4 2 2
+```
+- Note que, por padrão, a função `sample()` amostra sem reposição.
+
+
+# Criando funções
+- [Your first R function (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/BM3dR/your-first-r-function)
+- Para criar uma função, usamos a função `function(){}`:
+    - dentro dos parêntesis `()`, incluímos nomes de variáveis arbitrárias (argumentos/inputs) que serão utilizadas pela função para fazer cálculos
+    - dentro das chaves `{}`, usamos os nomes das variáveis arbitrárias definidas dentro do parêntesis para fazer cálculos e retornar um output (último valor dentro das chaves)
+- Como exemplo, criaremos uma função que pega 2 números como inputs e retorna sua soma
+
+```r
+soma = function(a, b) {
+    a + b
+}
+```
+- Ao atribuir a função ao objeto `soma` não geramos resultados. Para fazer isso, usamos a função `soma()` inserindo 2 números como inputs:
+
+```r
+soma(10, 4)
+```
+
+```
+## [1] 14
+```
+- Note que as variáveis arbitrárias `a` e `b` são utilizadas apenas dentro da função
+```r
+> a
+Error: object 'a' not found
+```
+
+- Note que podemos inserir um valor padrão para um argumento de função. Como exemplo, criaremos uma função que retorna todos elementos acima de `n` de um vetor dado:
+
+```r
+vetor = 1:20
+above = function(x, n = 10) {
+    x[x > n]
+}
+
+above(vetor) # todos acima do valor padrão 10
+```
+
+```
+##  [1] 11 12 13 14 15 16 17 18 19 20
+```
+
+```r
+above(vetor, 14) # todos acima de 14
+```
+
+```
+## [1] 15 16 17 18 19 20
+```
+
+# Resumindo dados
+
+
+## Funções básicas para resumir dados
+- [Summarizing data (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/e5qVi/summarizing-data)
+- Para esta seção, usaremos a base de dados `airquality`, já presente no R.
+- Verificaremos o **dimensões** da base com `dim()` e visualizaremos as 6 **primeiras** e **últimas** linhas da base via `head()` e `tail()`, respectivamente.
+
+```r
+# data() # lista de base de dados presentes no R
+bd_air = airquality # Atribuindo a base a um outro objeto
+
+dim(bd_air) # Verificar tamanho da base (linhas x colunas)
+```
+
+```
+## [1] 153   6
+```
+
+```r
+head(bd_air) # Visualizando as 6 primeiras linhas
+```
+
+```
+##   Ozone Solar.R Wind Temp Month Day
+## 1    41     190  7.4   67     5   1
+## 2    36     118  8.0   72     5   2
+## 3    12     149 12.6   74     5   3
+## 4    18     313 11.5   62     5   4
+## 5    NA      NA 14.3   56     5   5
+## 6    28      NA 14.9   66     5   6
+```
+
+```r
+tail(bd_air) # Visualizando as 6 últimas linhas
+```
+
+```
+##     Ozone Solar.R Wind Temp Month Day
+## 148    14      20 16.6   63     9  25
+## 149    30     193  6.9   70     9  26
+## 150    NA     145 13.2   77     9  27
+## 151    14     191 14.3   75     9  28
+## 152    18     131  8.0   76     9  29
+## 153    20     223 11.5   68     9  30
+```
+- Usando `str()`, podemos visualizar a **estrutura** da base:
+    - todas a variáveis (colunas),
+    - a classe de cada uma delas e
+    - algumas de suas observações.
+
+```r
+str(bd_air)
+```
+
+```
+## 'data.frame':	153 obs. of  6 variables:
+##  $ Ozone  : int  41 36 12 18 NA 28 23 19 8 NA ...
+##  $ Solar.R: int  190 118 149 313 NA NA 299 99 19 194 ...
+##  $ Wind   : num  7.4 8 12.6 11.5 14.3 14.9 8.6 13.8 20.1 8.6 ...
+##  $ Temp   : int  67 72 74 62 56 66 65 59 61 69 ...
+##  $ Month  : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ Day    : int  1 2 3 4 5 6 7 8 9 10 ...
+```
+- Podemos ver as **categorias/valores únicos** para cada variável combinando `apply()` e `unique()`
+
+```r
+apply(bd_air, 2, unique)
+```
+
+```
+## $Ozone
+##  [1]  41  36  12  18  NA  28  23  19   8   7  16  11  14  34   6  30   1   4  32
+## [20]  45 115  37  29  71  39  21  20  13 135  49  64  40  77  97  85  10  27  48
+## [39]  35  61  79  63  80 108  52  82  50  59   9  78  66 122  89 110  44  65  22
+## [58]  31 168  73  76 118  84  96  91  47  24  46
+## 
+## $Solar.R
+##   [1] 190 118 149 313  NA 299  99  19 194 256 290 274  65 334 307  78 322  44
+##  [19]   8 320  25  92  66 266  13 252 223 279 286 287 242 186 220 264 127 273
+##  [37] 291 323 259 250 148 332 191 284  37 120 137 150  59  91 135  47  98  31
+##  [55] 138 269 248 236 101 175 314 276 267 272 139  48 260 285 187   7 258 295
+##  [73] 294  81  82 213 275 253 254  83  24  77 255 229 207 222 192 157  64  71
+##  [91]  51 115 244  36 212 238 215 153 203 225 237 188 167 197 183 189  95 230
+## [109] 112 224  27 201  14  49  20 193 145 131
+## 
+## $Wind
+##  [1]  7.4  8.0 12.6 11.5 14.3 14.9  8.6 13.8 20.1  6.9  9.7  9.2 10.9 13.2 12.0
+## [16] 18.4 16.6  5.7 16.1 20.7 10.3  6.3  1.7  4.6  4.1  5.1  4.0 15.5  3.4  2.3
+## [31]  2.8
+## 
+## $Temp
+##  [1] 67 72 74 62 56 66 65 59 61 69 68 58 64 57 73 81 79 76 78 84 85 82 87 90 93
+## [26] 92 80 77 75 83 88 89 91 86 97 94 96 71 63 70
+## 
+## $Month
+## [1] 5 6 7 8 9
+## 
+## $Day
+##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+## [26] 26 27 28 29 30 31
+```
+- Podemos verificar o **número de NA's** em cada coluna usando `apply()` com `sum` (ou também `colSums()`) na base de dados com `is.na()` (transforma a base de dados em TRUE/FALSE se for ou não `NA`)
+
+```r
+head( is.na(bd_air) ) # 6 primeiras linhas aplicando is.na()
+```
+
+```
+##      Ozone Solar.R  Wind  Temp Month   Day
+## [1,] FALSE   FALSE FALSE FALSE FALSE FALSE
+## [2,] FALSE   FALSE FALSE FALSE FALSE FALSE
+## [3,] FALSE   FALSE FALSE FALSE FALSE FALSE
+## [4,] FALSE   FALSE FALSE FALSE FALSE FALSE
+## [5,]  TRUE    TRUE FALSE FALSE FALSE FALSE
+## [6,] FALSE    TRUE FALSE FALSE FALSE FALSE
+```
+
+```r
+apply(is.na(bd_air), 2, sum) # somando cada coluna de TRUE/FALSE
+```
+
+```
+##   Ozone Solar.R    Wind    Temp   Month     Day 
+##      37       7       0       0       0       0
+```
+
+- Para fazer um **resumo** de todas as variáveis da base, podemos usar a função `summary()` que, para variáveis numéricas, calcula a média e os quartis, e mostra a quantidade de `NA`.
+
+```r
+summary(bd_air)
+```
+
+```
+##      Ozone           Solar.R           Wind             Temp      
+##  Min.   :  1.00   Min.   :  7.0   Min.   : 1.700   Min.   :56.00  
+##  1st Qu.: 18.00   1st Qu.:115.8   1st Qu.: 7.400   1st Qu.:72.00  
+##  Median : 31.50   Median :205.0   Median : 9.700   Median :79.00  
+##  Mean   : 42.13   Mean   :185.9   Mean   : 9.958   Mean   :77.88  
+##  3rd Qu.: 63.25   3rd Qu.:258.8   3rd Qu.:11.500   3rd Qu.:85.00  
+##  Max.   :168.00   Max.   :334.0   Max.   :20.700   Max.   :97.00  
+##  NA's   :37       NA's   :7                                       
+##      Month            Day      
+##  Min.   :5.000   Min.   : 1.0  
+##  1st Qu.:6.000   1st Qu.: 8.0  
+##  Median :7.000   Median :16.0  
+##  Mean   :6.993   Mean   :15.8  
+##  3rd Qu.:8.000   3rd Qu.:23.0  
+##  Max.   :9.000   Max.   :31.0  
+## 
+```
+- Também podemos calcular os **quantis** via `quantile()`
+
+```r
+quantile(bd_air$Ozone, probs=c(0, .25, .5 , .75, 1), na.rm=TRUE)
+```
+
+```
+##     0%    25%    50%    75%   100% 
+##   1.00  18.00  31.50  63.25 168.00
+```
+- Outra maneira de verificarmos quartis/médias de variáveis numéricas de um data frame inteiro é utilizando o `summary()`
+
+```r
+summary(bd_air)
+```
+
+```
+##      Ozone           Solar.R           Wind             Temp      
+##  Min.   :  1.00   Min.   :  7.0   Min.   : 1.700   Min.   :56.00  
+##  1st Qu.: 18.00   1st Qu.:115.8   1st Qu.: 7.400   1st Qu.:72.00  
+##  Median : 31.50   Median :205.0   Median : 9.700   Median :79.00  
+##  Mean   : 42.13   Mean   :185.9   Mean   : 9.958   Mean   :77.88  
+##  3rd Qu.: 63.25   3rd Qu.:258.8   3rd Qu.:11.500   3rd Qu.:85.00  
+##  Max.   :168.00   Max.   :334.0   Max.   :20.700   Max.   :97.00  
+##  NA's   :37       NA's   :7                                       
+##      Month            Day      
+##  Min.   :5.000   Min.   : 1.0  
+##  1st Qu.:6.000   1st Qu.: 8.0  
+##  Median :7.000   Median :16.0  
+##  Mean   :6.993   Mean   :15.8  
+##  3rd Qu.:8.000   3rd Qu.:23.0  
+##  Max.   :9.000   Max.   :31.0  
+## 
+```
+- Note que, para variáveis lógicas, de texto ou categóricas (factor), aparecem a quantidade de cada valor:
+
+```r
+summary(CO2) # base de dados 'Carbon Dioxide Uptake in Grass Plants'
+```
+
+```
+##      Plant             Type         Treatment       conc          uptake     
+##  Qn1    : 7   Quebec     :42   nonchilled:42   Min.   :  95   Min.   : 7.70  
+##  Qn2    : 7   Mississippi:42   chilled   :42   1st Qu.: 175   1st Qu.:17.90  
+##  Qn3    : 7                                    Median : 350   Median :28.30  
+##  Qc1    : 7                                    Mean   : 435   Mean   :27.21  
+##  Qc3    : 7                                    3rd Qu.: 675   3rd Qu.:37.12  
+##  Qc2    : 7                                    Max.   :1000   Max.   :45.50  
+##  (Other):42
+```
+- Para variáveis de texto, pode ser interessante fazer uma **tabela com a contagem** de cada possível categoria de uma variável. Isto é possível por meio da função `table()` e aplicaremos `prop.table(table())` para visualizar em **percentuais**.
+
+```r
+table(CO2$Type, useNA="ifany") # mostrando os NA's
+```
+
+```
+## 
+##      Quebec Mississippi 
+##          42          42
+```
+
+```r
+prop.table(table(CO2$Type, useNA="ifany"))
+```
+
+```
+## 
+##      Quebec Mississippi 
+##         0.5         0.5
+```
+
+```r
+# table(bd_air$Month, useNA="ifany") # mostrando os NA's
+# prop.table(table(bd_air$Month, useNA="ifany"))
+```
+- Também podemos incluir mais uma variável em `table()` para verificar alguma relação entre categorias de 2 variáveis:
+
+```r
+table(CO2$Type, CO2$Treatment, useNA="ifany")
+```
+
+```
+##              
+##               nonchilled chilled
+##   Quebec              21      21
+##   Mississippi         21      21
+```
+
+
+## Família de funções _apply_
+Veremos uma família de funções _apply_ que permitem executar comandos em loop de maneira compacta:
+
+- `lapply`: loop sobre uma lista e avalia uma função em cada elemento
+    - função auxiliar `split` é útil ao ser utilizada em conjunto da `lapply`
+- `sapply`: mesmo que o `lapply`, mas simplifica o resultado
+- `apply`: aplica uma função sobre as margens de um array
+- `tapply`: aplica uma função sobre subconjuntos de um vetor
+- `mapply`: versão multivariada do `lapply`
+
+
+
+### Função `lapply()`
+- [Loop functions - lapply (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/t5iuo/loop-functions-lapply)
+- `lapply` usa três argumentos: uma **lista**, o nome de uma função e outros argumentos (incluindo os da função inserida)
+```yaml
+lapply(X, FUN, ...)
+
+X: a vector (atomic or list) or an expression object. Other objects (including classed objects) will be coerced by base::as.list.
+FUN: the function to be applied to each element of X: see ‘Details’. In the case of functions like +, %*%, the function name must be backquoted or quoted.
+... : optional arguments to FUN.
+```
+
+```r
+x = list(a=1:5, b=rnorm(10))
+lapply(x, mean)
+```
+
+```
+## $a
+## [1] 3
+## 
+## $b
+## [1] 0.09503718
+```
+
+- `lapply` transforma o objeto em uma _lista_ (caso o input não seja), em que cada elemento possui um único elemento
+
+```r
+nada = function(x) {
+    x # Retorna o próprio input
+}
+
+x = 1:4 # Vetor de 1 a 4 (será transformado em lista no lapply)
+lapply(x, nada)
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 2
+## 
+## [[3]]
+## [1] 3
+## 
+## [[4]]
+## [1] 4
+```
+
+- `lapply` sempre retorna uma _lista_ como output. Como exemplo, usaremos a função `runif(n, min = 0, max = 1)` para gerar `n` números aleatórios:
+
+```r
+runif(2) # Gerando 2 números aleatórios
+```
+
+```
+## [1] 0.5937887 0.8591878
+```
+
+```r
+x = 1:4 # Vetor de 1 a 4 (será transformado em lista no lapply)
+lapply(x, runif, min=0, max=10) # 2 últimos argumentos são do runif
+```
+
+```
+## [[1]]
+## [1] 8.670467
+## 
+## [[2]]
+## [1] 8.598541 7.804118
+## 
+## [[3]]
+## [1] 5.5651059 0.6884968 5.6236951
+## 
+## [[4]]
+## [1] 7.436961 4.330083 4.807630 3.939503
+```
+- Podemos usar funções _anônimas_ diretamente no `lapply`. Como exemplo, criaremos uma função que nos dá a 1ª coluna de uma matriz ou data frame:
+
+```r
+# Criando lista com 2 matrizes
+x = list(a=matrix(1:4, 2, 2), b=matrix(1:6, 3, 2))
+x
+```
+
+```
+## $a
+##      [,1] [,2]
+## [1,]    1    3
+## [2,]    2    4
+## 
+## $b
+##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6
+```
+
+```r
+# Pegando as primeiras colunas de cada matriz da lista x
+lapply(x, function(matriz){matriz[, 1]})
+```
+
+```
+## $a
+## [1] 1 2
+## 
+## $b
+## [1] 1 2 3
+```
+
+
+### Função `sapply()`
+Similar ao `lapply`, mas `sapply` tenta simplificar o output:
+
+- Se o resultado for uma lista em que todo elemento tem comprimento 1 (tem apenas um elemento também), retorna um vetor
+
+```r
+x = list(a=1:4, b=rnorm(10), c=rnorm(20, 1), d=rnorm(100, 5))
+x
+```
+
+```
+## $a
+## [1] 1 2 3 4
+## 
+## $b
+##  [1] -0.24161529  0.64098635 -0.25820188 -0.73332070  0.87197545 -0.98832691
+##  [7] -0.09988941 -0.58717173  2.33164258  0.66131082
+## 
+## $c
+##  [1]  0.16976312  1.88227815  0.18442803 -0.37486747  3.14025902  0.74389176
+##  [7]  0.09154604  1.15569141  1.30875951  1.94883852  0.69756603 -1.28280100
+## [13]  2.01648652  0.98100527  1.94990795  1.13478146  1.02230793 -0.62571626
+## [19]  2.59432927  2.26079231
+## 
+## $d
+##   [1] 5.529222 2.913512 5.369160 6.776437 4.807680 6.298477 6.355678 6.352036
+##   [9] 3.370385 5.614409 5.996717 4.116702 5.420934 7.161388 3.776390 4.616051
+##  [17] 4.024143 4.216093 3.900409 3.625350 4.549632 4.972340 5.068698 5.307460
+##  [25] 5.246732 5.517935 5.712176 6.582819 4.587613 5.853698 3.827946 4.693601
+##  [33] 5.536879 4.701181 4.247484 4.832790 3.726103 4.653334 5.960611 4.560017
+##  [41] 5.610384 6.145763 4.765829 5.839324 4.691281 4.429734 5.599147 3.573928
+##  [49] 5.585146 3.341348 5.309365 4.148279 3.833198 4.591717 4.780917 4.561008
+##  [57] 4.500162 5.246492 5.695457 3.896415 5.433250 5.331584 5.401143 3.986474
+##  [65] 3.911387 6.308419 4.808292 4.023193 4.063611 4.209425 5.240300 6.160136
+##  [73] 5.386078 4.263708 7.697282 4.902519 3.757015 5.100277 4.309255 6.035665
+##  [81] 5.365029 5.089382 5.245258 4.666262 5.285963 5.338129 4.259234 5.145921
+##  [89] 5.779424 3.512021 4.812174 4.317364 4.532602 5.104096 5.409370 3.590450
+##  [97] 6.802717 5.815635 5.724371 6.597082
+```
+
+```r
+lapply(x, mean) # retorna uma lista
+```
+
+```
+## $a
+## [1] 2.5
+## 
+## $b
+## [1] 0.1597389
+## 
+## $c
+## [1] 1.049962
+## 
+## $d
+## [1] 4.992466
+```
+
+```r
+sapply(x, mean) # retorna um vetor
+```
+
+```
+##         a         b         c         d 
+## 2.5000000 0.1597389 1.0499624 4.9924661
+```
+- Se o resultado for uma lista em que cada elemento tem mesmo comprimento ($>1$), retorna uma matriz
+
+```r
+x = 1:4
+
+tabuada = function(a) {
+    a * 1:10
+}
+tabuada(2)
+```
+
+```
+##  [1]  2  4  6  8 10 12 14 16 18 20
+```
+
+```r
+lapply(x, tabuada) # retorna uma lista
+```
+
+```
+## [[1]]
+##  [1]  1  2  3  4  5  6  7  8  9 10
+## 
+## [[2]]
+##  [1]  2  4  6  8 10 12 14 16 18 20
+## 
+## [[3]]
+##  [1]  3  6  9 12 15 18 21 24 27 30
+## 
+## [[4]]
+##  [1]  4  8 12 16 20 24 28 32 36 40
+```
+
+```r
+sapply(x, tabuada) # retorna uma matrix
+```
+
+```
+##       [,1] [,2] [,3] [,4]
+##  [1,]    1    2    3    4
+##  [2,]    2    4    6    8
+##  [3,]    3    6    9   12
+##  [4,]    4    8   12   16
+##  [5,]    5   10   15   20
+##  [6,]    6   12   18   24
+##  [7,]    7   14   21   28
+##  [8,]    8   16   24   32
+##  [9,]    9   18   27   36
+## [10,]   10   20   30   40
+```
+
+- Caso contrário, retorna uma lista (assim como `lapply`)
+
+```r
+x = 1:4
+sapply(x, runif, min=0, max=10) # retorna igual ao lapply
+```
+
+```
+## [[1]]
+## [1] 9.77743
+## 
+## [[2]]
+## [1] 5.417211 2.893228
+## 
+## [[3]]
+## [1] 4.0418201 1.2314395 0.7841981
+## 
+## [[4]]
+## [1] 7.779735 1.469833 9.141802 6.060571
+```
+
+
+### Função `apply()`
+- [Loop functions - apply (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/IUUhK/loop-functions-apply)
+- Usado para avaliar, por meio de uma função, margens de um array
+- Frequentemente é utilizado para aplicar uma função a linhas ou a colunas de uma matriz
+- Não é mais rápido do que escrever um loop, mas funciona em uma única linha
+```yaml
+apply(X, MARGIN, FUN, ...)
+
+X: an array, including a matrix.MARGIN: a vector giving the subscripts which the function will be applied over. E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns. Where X has named dimnames, it can be a character vector selecting dimension names.
+FUN: the function to be applied: see ‘Details’. In the case of functions like +, %*%, etc., the function name must be backquoted or quoted.
+... : optional arguments to FUN.
+```
+
+```r
+x = matrix(1:20, 5, 4)
+x
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    6   11   16
+## [2,]    2    7   12   17
+## [3,]    3    8   13   18
+## [4,]    4    9   14   19
+## [5,]    5   10   15   20
+```
+
+```r
+apply(x, 1, mean) # médias das linhas
+```
+
+```
+## [1]  8.5  9.5 10.5 11.5 12.5
+```
+
+```r
+apply(x, 2, mean) # médias das colunas
+```
+
+```
+## [1]  3  8 13 18
+```
+- Há funções pré-definidas que aplicam `apply` com soma e com média:
+    - `rowSums = apply(x, 1, sum)`
+    - `rowMeans = apply(x, 1, mean)`
+    - `colSums = apply(x, 2, sum)`
+    - `colMeans = apply(x, 2, mean)`
+- Podemos também calcular os quantis de uma matriz usando a função `quantile()`
+```yaml
+quantile(x, probs = seq(0, 1, 0.25), na.rm = FALSE,
+         names = TRUE, type = 7, digits = 7, ...)
+
+x: numeric vector whose sample quantiles are wanted, or an object of a class for which a method has been defined (see also ‘details’). NA and NaN values are not allowed in numeric vectors unless na.rm is TRUE.
+probs: numeric vector of probabilities with values in [0,1]. (Values up to 2e-14 outside that range are accepted and moved to the nearby endpoint.)
+na.rm: logical; if true, any NA and NaN's are removed from x before the quantiles are computed.
+```
+
+```r
+x = matrix(1:50, 10, 5) # matriz 20x10 - 200 números ~ N(0, 1)
+apply(x, 2, quantile, probs=c(0, .25, .5, .75, 1))
+```
+
+```
+##       [,1]  [,2]  [,3]  [,4]  [,5]
+## 0%    1.00 11.00 21.00 31.00 41.00
+## 25%   3.25 13.25 23.25 33.25 43.25
+## 50%   5.50 15.50 25.50 35.50 45.50
+## 75%   7.75 17.75 27.75 37.75 47.75
+## 100% 10.00 20.00 30.00 40.00 50.00
+```
+
+
+### Função `mapply()`
+- [Loop functions - mapply (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/EBnAr/loop-functions-mapply)
+- Versão multivariada de apply. Antes incluímos apenas um vetor `x` para aplicar na função, agora iremos incluir 2 ou mais vetores.
+- Por isso, `mapply` tem como primeiro argumento a função `FUN`, já que podemos ter diversos vetores como input
+```yaml
+mapply(FUN, ..., MoreArgs = NULL, SIMPLIFY = TRUE,
+       USE.NAMES = TRUE)
+
+FUN: function to apply, found via match.fun.
+...	: arguments to vectorize over (vectors or lists of strictly positive length, or all of zero length). See also ‘Details’.
+MoreArgs: a list of other arguments to FUN.
+SIMPLIFY: logical or character string; attempt to reduce the result to a vector, matrix or higher dimensional array; see the simplify argument of sapply.
+```
+- Note que, agora, precisamos incluir os argumento da função por meio de uma _lista_ no argumento `MoreArgs`
+- Como exemplo, usaremos a função `rep(x, n)` que cria um vetor com o objeto `x` repetido `n` vezes (**são necessário 2 argumentos**)
+
+```r
+rep(1, 5)
+```
+
+```
+## [1] 1 1 1 1 1
+```
+
+```r
+# Criando uma lista com números repetidos
+list(rep(1, 4), rep(2, 3), rep(3, 2), rep(4, 1))
+```
+
+```
+## [[1]]
+## [1] 1 1 1 1
+## 
+## [[2]]
+## [1] 2 2 2
+## 
+## [[3]]
+## [1] 3 3
+## 
+## [[4]]
+## [1] 4
+```
+
+```r
+# Podemos fazer o mesmo usando a função mapply
+mapply(rep, 1:4, 4:1)
+```
+
+```
+## [[1]]
+## [1] 1 1 1 1
+## 
+## [[2]]
+## [1] 2 2 2
+## 
+## [[3]]
+## [1] 3 3
+## 
+## [[4]]
+## [1] 4
+```
+
+
+### Função `tapply()`
+- [Loop functions - tapply (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/w98BR/loop-functions-tapply)
+- Função `tapply` é uma versão do `apply` em que há um output para cada grupo/categoria.
+- Para usá-la, precisamos inserir tanto um vetor de valores `x`, quanto um vetor de índices dos grupos/categoria.
+```yaml
+tapply(X, INDEX, FUN = NULL, ..., default = NA, simplify = TRUE)
+
+X: an R object for which a split method exists. Typically vector-like, allowing subsetting with [.
+INDEX: a list of one or more factors, each of same length as X. The elements are coerced to factors by as.factor.
+FUN: a function (or name of a function) to be applied, or NULL. In the case of functions like +, %*%, etc., the function name must be backquoted or quoted. If FUN is NULL, tapply returns a vector which can be used to subscript the multi-way array tapply normally produces.
+```
+- Como exemplo, calcularemos a média de `x` para 4 grupos
+
+```r
+x = rnorm(20)
+grupos = rep(c("a", "b", "c", "d"), 5)
+data.frame(x, grupos)
+```
+
+```
+##             x grupos
+## 1  -1.1544026      a
+## 2  -0.3792106      b
+## 3   0.3795010      c
+## 4  -1.4384323      d
+## 5  -0.8830569      a
+## 6   0.1625434      b
+## 7   0.9545178      c
+## 8  -0.1856107      d
+## 9   0.1239079      a
+## 10  0.8597937      b
+## 11  0.3516725      c
+## 12  0.1187191      d
+## 13  1.0124213      a
+## 14 -0.4288232      b
+## 15 -1.2051979      c
+## 16 -0.3215946      d
+## 17  1.2384867      a
+## 18  1.1938418      b
+## 19  1.9773448      c
+## 20 -0.9919061      d
+```
+
+```r
+tapply(x, grupos, mean)
+```
+
+```
+##           a           b           c           d 
+##  0.06747127  0.28162903  0.49156765 -0.56376492
+```
+
+
+### Função `split()`
+- [Loop functions - split (John Hopkins/Coursera)](https://www.coursera.org/learn/r-programming/lecture/2VYGZ/loop-functions-split)
+- Assim como o `tapply`, divide em grupos, mas retorna apenas uma lista com elementos correspondentes aos grupos e seus valores
+
+```r
+split(x, grupos)
+```
+
+```
+## $a
+## [1] -1.1544026 -0.8830569  0.1239079  1.0124213  1.2384867
+## 
+## $b
+## [1] -0.3792106  0.1625434  0.8597937 -0.4288232  1.1938418
+## 
+## $c
+## [1]  0.3795010  0.9545178  0.3516725 -1.2051979  1.9773448
+## 
+## $d
+## [1] -1.4384323 -0.1856107  0.1187191 -0.3215946 -0.9919061
+```
+- Depois de separar em uma lista, podemos usar o `lapply` ou `sapply` (é como se fosse aplicar o `tapply`, mas em 2 etapas)
+
+```r
+sapply(split(x, grupos), mean)
+```
+
+```
+##           a           b           c           d 
+##  0.06747127  0.28162903  0.49156765 -0.56376492
+```
+
+
+# Manipulação de dados
+
+> “Between 30% to 80% of the data analysis task is spent on cleaning and understanding the data.” (Dasu \& Johnson, 2003)
+
+## Extração de subconjuntos
+- [Subsetting and sorting (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/aqd2Y/subsetting-and-sorting)
+- Como exemplo, criaremos um _data frame_ com três variáveis, em que, para misturar a ordem dos números, usaremos a função `sample()` num vetor de números e também incluiremos alguns valores ausentes `NA`.
+
+```r
+set.seed(2022)
+x = data.frame("var1"=sample(1:5), "var2"=sample(6:10), "var3"=sample(11:15))
+x
+```
+
+```
+##   var1 var2 var3
+## 1    4    9   13
+## 2    3    7   11
+## 3    2    8   12
+## 4    1   10   15
+## 5    5    6   14
+```
+
+```r
+x$var2[c(1, 3)] = NA
+x
+```
+
+```
+##   var1 var2 var3
+## 1    4   NA   13
+## 2    3    7   11
+## 3    2   NA   12
+## 4    1   10   15
+## 5    5    6   14
+```
+- Lembre-se que, para extrair um subconjunto de um data frame, usamos as chaves `[]` indicando vetores de linhas e de colunas (ou também os nomes das colunas).
+
+```r
+x[, 1] # Todas linhas e 1ª coluna
+```
+
+```
+## [1] 4 3 2 1 5
+```
+
+```r
+x[, "var1"] # Todas linhas e 1ª coluna (usando seu nome)
+```
+
+```
+## [1] 4 3 2 1 5
+```
+
+```r
+x[1:2, "var2"] # Linhas 1 e 2, e 2ª coluna (usando seu nome)
+```
+
+```
+## [1] NA  7
+```
+- Note que, podemos usar expressões lógicas (vetor com `TRUE` e `FALSE`) para extrair uma parte do data frame. Por exemplo, queremos obter apenas as observações em que a variável 1 seja menor ou igual a 3 **E** (`&`) que a variável 3 seja estritamente maior do que 11:
+
+```r
+x$var1 <= 3 & x$var3 > 11
+```
+
+```
+## [1] FALSE FALSE  TRUE  TRUE FALSE
+```
+
+```r
+# Extraindo as linhas de x
+x[x$var1 <= 3 & x$var3 > 11, ]
+```
+
+```
+##   var1 var2 var3
+## 3    2   NA   12
+## 4    1   10   15
+```
+- Poderíamos também obter apenas as observações em que a variável 1 seja menor ou igual a 3 **OU** (`|`) que a variável 3 seja estritamente maior do que 11:
+
+```r
+x[x$var1 <= 3 | x$var3 > 11, ]
+```
+
+```
+##   var1 var2 var3
+## 1    4   NA   13
+## 2    3    7   11
+## 3    2   NA   12
+## 4    1   10   15
+## 5    5    6   14
+```
+- Também podemos verificar se determinados valores estão contidos em um vetor específico (equivale `==` com mais de um valor)
+
+```r
+x$var1 %in% c(1, 5) # obs em que var1 é igual a 1 ou 5
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE  TRUE
+```
+
+```r
+x[x$var1 %in% c(1, 5), ]
+```
+
+```
+##   var1 var2 var3
+## 4    1   10   15
+## 5    5    6   14
+```
+
+- Note que, ao escrevermos uma expressão lógica para um vetor que contém valores ausentes, gerará um vetor com `TRUE`, `FALSE` e `NA`
+
+```r
+x$var2 > 8
+```
+
+```
+## [1]    NA FALSE    NA  TRUE FALSE
+```
+
+```r
+x[x$var2 > 8, ]
+```
+
+```
+##      var1 var2 var3
+## NA     NA   NA   NA
+## NA.1   NA   NA   NA
+## 4       1   10   15
+```
+- Para contornar este problema, podemos usar a função `which()` que, ao invés de gerar um vetor de `TRUE`/`FALSE`, retorna um vetor com as posições dos elementos que tornam a expressão lógica verdadeira
+
+```r
+which(x$var2 > 8)
+```
+
+```
+## [1] 4
+```
+
+```r
+x[which(x$var2 > 8), ]
+```
+
+```
+##   var1 var2 var3
+## 4    1   10   15
+```
+- Outra forma de contornar os valores ausentes é incluir a condição 
+de não incluir valores ausentes `!is.na()`:
+
+```r
+x$var2 > 8 & !is.na(x$var2)
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE FALSE
+```
+
+```r
+x[x$var2 > 8 & !is.na(x$var2), ]
+```
+
+```
+##   var1 var2 var3
+## 4    1   10   15
+```
+
+
+## Ordenação
+- Podemos usar a função `sort()` para ordenar um vetor de maneira crescente (padrão) ou decrescente:
+
+```r
+sort(x$var1) # ordenando de maneira crescente
+```
+
+```
+## [1] 1 2 3 4 5
+```
+
+```r
+sort(x$var1, decreasing=TRUE) # ordenando de maneira decrescente
+```
+
+```
+## [1] 5 4 3 2 1
+```
+- Por padrão, o `sort()` retira os valores ausentes. Para mantê-los e deixá-los no final, precisamos usar o argumento `na.last=TRUE`
+
+```r
+sort(x$var2) # ordenando e retirando NA
+```
+
+```
+## [1]  6  7 10
+```
+
+```r
+sort(x$var2, na.last=TRUE) # ordenando e mantendo NA no final
+```
+
+```
+## [1]  6  7 10 NA NA
+```
+- Note que não podemos usar a função `sort()` para ordenar um data frame, pois a função retorna valores e, portanto, não retorna suas posições.
+
+```r
+sort(x$var3)
+```
+
+```
+## [1] 11 12 13 14 15
+```
+
+```r
+x[sort(x$var3), ] # Retorna erro, pois não há nº de linhas > 5
+```
+
+```
+##      var1 var2 var3
+## NA     NA   NA   NA
+## NA.1   NA   NA   NA
+## NA.2   NA   NA   NA
+## NA.3   NA   NA   NA
+## NA.4   NA   NA   NA
+```
+- Para ordenar data frames, precisamos utilizar a função `order()` que, ao invés de retorar os valores em algum ordem, retorna as suas posições
+
+```r
+order(x$var3)
+```
+
+```
+## [1] 2 3 1 5 4
+```
+
+```r
+x[order(x$var3), ] # Retorna erro, pois não há nº de linhas > 5
+```
+
+```
+##   var1 var2 var3
+## 2    3    7   11
+## 3    2   NA   12
+## 1    4   NA   13
+## 5    5    6   14
+## 4    1   10   15
+```
+
+## Inclusão de novas colunas/variáveis
+- Para incluir novas variáveis, podemos usar `$<novo_nome_var>` e atribuir um vetor de mesmo tamanho (mesma quantidade de linhas):
+
+```r
+set.seed(1234)
+x$var4 = rnorm(5)
+x
+```
+
+```
+##   var1 var2 var3       var4
+## 1    4   NA   13 -1.2070657
+## 2    3    7   11  0.2774292
+## 3    2   NA   12  1.0844412
+## 4    1   10   15 -2.3456977
+## 5    5    6   14  0.4291247
+```
+
+- [Algumas transformações comuns de variáveis (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/r6VHJ/creating-new-variables)
+
+```r
+abs(x$var4) # valor absoluto
+```
+
+```
+## [1] 1.2070657 0.2774292 1.0844412 2.3456977 0.4291247
+```
+
+```r
+sqrt(x$var4) # raiz quadrada
+```
+
+```
+## Warning in sqrt(x$var4): NaNs produzidos
+```
+
+```
+## [1]       NaN 0.5267155 1.0413651       NaN 0.6550761
+```
+
+```r
+ceiling(x$var4) # valor inteiro acima
+```
+
+```
+## [1] -1  1  2 -2  1
+```
+
+```r
+floor(x$var4) # valor inteiro abaixo
+```
+
+```
+## [1] -2  0  1 -3  0
+```
+
+```r
+round(x$var4, digits=1) # arredondamento com 1 dígito
+```
+
+```
+## [1] -1.2  0.3  1.1 -2.3  0.4
+```
+
+```r
+cos(x$var4) # cosseno
+```
+
+```
+## [1]  0.3557632  0.9617627  0.4674068 -0.6996456  0.9093303
+```
+
+```r
+sin(x$var4) # seno
+```
+
+```
+## [1] -0.9345761  0.2738841  0.8840424 -0.7144900  0.4160750
+```
+
+```r
+log(x$var4) # logaritmo natural
+```
+
+```
+## Warning in log(x$var4): NaNs produzidos
+```
+
+```
+## [1]         NaN -1.28218936  0.08106481         NaN -0.84600775
+```
+
+```r
+log10(x$var4) # logaritmo base 10
+```
+
+```
+## Warning: NaNs produzidos
+```
+
+```
+## [1]        NaN -0.5568478  0.0352060        NaN -0.3674165
+```
+
+```r
+exp(x$var4) # exponencial
+```
+
+```
+## [1] 0.29907355 1.31973273 2.95778648 0.09578035 1.53591253
+```
+
+
+
+## Juntando bases de dados
+
+### Acrescentando colunas e linhas via `cbind()` e `rbind()`
+
+- Uma maneira de juntar o data frame com um vetor de mesmo tamanho é usando `cbind()`
+
+```r
+y = rnorm(5)
+x = cbind(x, y)
+x
+```
+
+```
+##   var1 var2 var3       var4          y
+## 1    4   NA   13 -1.2070657  0.5060559
+## 2    3    7   11  0.2774292 -0.5747400
+## 3    2   NA   12  1.0844412 -0.5466319
+## 4    1   10   15 -2.3456977 -0.5644520
+## 5    5    6   14  0.4291247 -0.8900378
+```
+- Também podemos acrescentar linhas usando `rbind()`, desde que o vetor tenha a quantidade de elementos igual ao número de colunas (ou data frame a ser incluído tenha o mesmo número de colunas)
+
+```r
+z = rnorm(5)
+x = rbind(x, z)
+x
+```
+
+```
+##         var1       var2       var3        var4          y
+## 1  4.0000000         NA 13.0000000 -1.20706575  0.5060559
+## 2  3.0000000  7.0000000 11.0000000  0.27742924 -0.5747400
+## 3  2.0000000         NA 12.0000000  1.08444118 -0.5466319
+## 4  1.0000000 10.0000000 15.0000000 -2.34569770 -0.5644520
+## 5  5.0000000  6.0000000 14.0000000  0.42912469 -0.8900378
+## 6 -0.4771927 -0.9983864 -0.7762539  0.06445882  0.9594941
+```
+
+### Mesclando base de dados com `merge()`
+- [Merging data (John Hopkins/Coursera)](https://www.coursera.org/learn/data-cleaning/lecture/pVV6K/merging-data)
+- Podemos juntar base de dados a partir de uma variável-chave que aparece em ambas bases.
+- Como exemplo, utilizaremos duas bases de dados de respostas a perguntas (`solutions`) e de correções feitas por seus pares (`reviews`).
+
+```r
+solutions = read.csv("https://raw.githubusercontent.com/jtleek/dataanalysis/master/week2/007summarizingData/data/solutions.csv")
+head(solutions)
+```
+
+```
+##   id problem_id subject_id      start       stop time_left answer
+## 1  1        156         29 1304095119 1304095169      2343      B
+## 2  2        269         25 1304095119 1304095183      2329      C
+## 3  3         34         22 1304095127 1304095146      2366      C
+## 4  4         19         23 1304095127 1304095150      2362      D
+## 5  5        605         26 1304095127 1304095167      2345      A
+## 6  6        384         27 1304095131 1304095270      2242      C
+```
+
+```r
+reviews = read.csv("https://raw.githubusercontent.com/jtleek/dataanalysis/master/week2/007summarizingData/data/reviews.csv")
+head(reviews)
+```
+
+```
+##   id solution_id reviewer_id      start       stop time_left accept
+## 1  1           3          27 1304095698 1304095758      1754      1
+## 2  2           4          22 1304095188 1304095206      2306      1
+## 3  3           5          28 1304095276 1304095320      2192      1
+## 4  4           1          26 1304095267 1304095423      2089      1
+## 5  5          10          29 1304095456 1304095469      2043      1
+## 6  6           2          29 1304095471 1304095513      1999      1
+```
+- Note que:
+    - as primeiras colunas das bases `solutions` e `reviews`` são os identificadores únicos das soluções e dos reviews, respectivamente.
+    - na base `reviews` há a coluna _problem_id_ que faz a ligação entre esta base com a coluna _id_ da base `solutions`.
+- Usaremos a função `merge()` para juntar ambas bases em uma só, a partir do id da solução.
+
+```yaml
+merge(x, y, by = intersect(names(x), names(y)),
+      by.x = by, by.y = by, all = FALSE, all.x = all, all.y = all,
+      sort = TRUE, suffixes = c(".x",".y"), ...)
+
+x, y: data frames, or objects to be coerced to one.
+by, by.x, by.y: specifications of the columns used for merging. See ‘Details’.
+all: logical; all = L is shorthand for all.x = L and all.y = L, where L is either TRUE or FALSE.
+all.x: logical; if TRUE, then extra rows will be added to the output, one for each row in x that has no matching row in y. These rows will have NAs in those columns that are usually filled with values from y. The default is FALSE, so that only rows with data from both x and y are included in the output.
+all.y: logical; analogous to all.x.
+sort: logical. Should the result be sorted on the by columns?
+suffixes: a character vector of length 2 specifying the suffixes to be used for making unique the names of columns in the result which are not used for merging (appearing in by etc).
+```
+
+
+<center><img src="https://fhnishida.github.io/fearp/eco1/merge.webp"></center>
+
+
+```r
+mergedData = merge(reviews, solutions,
+                   by.x="solution_id",
+                   by.y="id",
+                   all=TRUE)
+head(mergedData)
+```
+
+```
+##   solution_id id reviewer_id    start.x     stop.x time_left.x accept
+## 1           1  4          26 1304095267 1304095423        2089      1
+## 2           2  6          29 1304095471 1304095513        1999      1
+## 3           3  1          27 1304095698 1304095758        1754      1
+## 4           4  2          22 1304095188 1304095206        2306      1
+## 5           5  3          28 1304095276 1304095320        2192      1
+## 6           6 16          22 1304095303 1304095471        2041      1
+##   problem_id subject_id    start.y     stop.y time_left.y answer
+## 1        156         29 1304095119 1304095169        2343      B
+## 2        269         25 1304095119 1304095183        2329      C
+## 3         34         22 1304095127 1304095146        2366      C
+## 4         19         23 1304095127 1304095150        2362      D
+## 5        605         26 1304095127 1304095167        2345      A
+## 6        384         27 1304095131 1304095270        2242      C
+```
+
+- Note que, como há colunas de mesmos nomes, e especificamos que a variável chave era somente o id de solução, então as colunas de nomes iguais foram renomeadas com sufixos `.x` e `.y`, correspondendo às 1ª e 2ª bases inseridas na função `merge()`
+- Para verificar as colunas com mesmos nomes em duas bases, podemos usar a função `intersect()` em conjunto com a função `names()`:
+
+```r
+intersect( names(solutions), names(reviews) )
+```
+
+```
+## [1] "id"        "start"     "stop"      "time_left"
+```
+- Se não especificássemos nenhuma variável-chave, a função `merge()` utilizaria como variável-chave todas as colunas com nomes iguais em ambas bases de dados 
+
+```r
+wrong = merge(reviews, solutions,
+                   all=TRUE)
+head(wrong)
+```
+
+```
+##   id      start       stop time_left solution_id reviewer_id accept problem_id
+## 1  1 1304095119 1304095169      2343          NA          NA     NA        156
+## 2  1 1304095698 1304095758      1754           3          27      1         NA
+## 3  2 1304095119 1304095183      2329          NA          NA     NA        269
+## 4  2 1304095188 1304095206      2306           4          22      1         NA
+## 5  3 1304095127 1304095146      2366          NA          NA     NA         34
+## 6  3 1304095276 1304095320      2192           5          28      1         NA
+##   subject_id answer
+## 1         29      B
+## 2         NA   <NA>
+## 3         25      C
+## 4         NA   <NA>
+## 5         22      C
+## 6         NA   <NA>
+```
+
+
+
+
+# Manipulação via `dplyr`
+- [Vignette - Introduction to _dplyr_](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
+- O pacote `dplyr` facilita a manipulação dos dados por meio de funções simples e computacionalmente eficientes
+- As funções pode, ser organizadas em três categorias:
+    - Colunas:
+        - `select()`: seleciona (ou retira) as colunas do data frame
+        - `rename()`: muda os nomes das colunas
+        - `mutate()`: cria ou muda os valores nas colunas
+    - Linhas:
+        - `filter()`: seleciona linhas de acordo com valores das colunas
+        - `arrange()`: organiza a ordem das linhas
+    - Grupo de linhas:
+        - `summarise()`: colapsa um grupo em uma única linha
+- Nesta subseção, continuaremos utilizando a base de dados de Star Wars (`starwars`), utilizada na subseção anterior.
+- Você irá notar que, ao usar essas funções, o data frame é transformado em um _tibble_ que é um formato mais eficiente para tratar dados tabulares, mas que funciona de forma igual a um data frame.
+
+
+```r
+library("dplyr")
+detach("package:MASS", unload = TRUE) # pode conflitar com select() deste pacote se estiver ativo
+
+bd_sw = starwars # Dando novo nome para a base starwars
+head(bd_sw)
+```
+
+```
+## # A tibble: 6 × 14
+##   name         height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##   <chr>         <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+## 1 Luke Skywal…    172    77 blond   fair    blue       19   male  mascu… Tatooi…
+## 2 C-3PO           167    75 <NA>    gold    yellow    112   none  mascu… Tatooi…
+## 3 R2-D2            96    32 <NA>    white,… red        33   none  mascu… Naboo  
+## 4 Darth Vader     202   136 none    white   yellow     41.9 male  mascu… Tatooi…
+## 5 Leia Organa     150    49 brown   light   brown      19   fema… femin… Aldera…
+## 6 Owen Lars       178   120 brown,… light   blue       52   male  mascu… Tatooi…
+## # … with 4 more variables: species <chr>, films <list>, vehicles <list>,
+## #   starships <list>, and abbreviated variable names ¹​hair_color, ²​skin_color,
+## #   ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+
+
+## Filtre linhas com `filter()`
+- Permite selecionar um subconjunto de linhas de um data frame
+```yaml
+filter(.data, ...)
+
+.data: A data frame, data frame extension (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
+...	: <data-masking> Expressions that return a logical value, and are defined in terms of the variables in .data. If multiple expressions are included, they are combined with the & operator. Only rows for which all conditions evaluate to TRUE are kept.
+```
+- 
+
+```r
+bd_sw1 = filter(bd_sw, species == "Human", height >= 100)
+bd_sw1
+```
+
+```
+## # A tibble: 31 × 14
+##    name        height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##    <chr>        <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+##  1 Luke Skywa…    172    77 blond   fair    blue       19   male  mascu… Tatooi…
+##  2 Darth Vader    202   136 none    white   yellow     41.9 male  mascu… Tatooi…
+##  3 Leia Organa    150    49 brown   light   brown      19   fema… femin… Aldera…
+##  4 Owen Lars      178   120 brown,… light   blue       52   male  mascu… Tatooi…
+##  5 Beru White…    165    75 brown   light   blue       47   fema… femin… Tatooi…
+##  6 Biggs Dark…    183    84 black   light   brown      24   male  mascu… Tatooi…
+##  7 Obi-Wan Ke…    182    77 auburn… fair    blue-g…    57   male  mascu… Stewjon
+##  8 Anakin Sky…    188    84 blond   fair    blue       41.9 male  mascu… Tatooi…
+##  9 Wilhuff Ta…    180    NA auburn… fair    blue       64   male  mascu… Eriadu 
+## 10 Han Solo       180    80 brown   fair    brown      29   male  mascu… Corell…
+## # … with 21 more rows, 4 more variables: species <chr>, films <list>,
+## #   vehicles <list>, starships <list>, and abbreviated variable names
+## #   ¹​hair_color, ²​skin_color, ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+
+```r
+# Equivalente a:
+bd_sw[bd_sw$species == "Human" & bd_sw$height >= 100, ]
+```
+
+```
+## # A tibble: 39 × 14
+##    name        height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##    <chr>        <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+##  1 Luke Skywa…    172    77 blond   fair    blue       19   male  mascu… Tatooi…
+##  2 Darth Vader    202   136 none    white   yellow     41.9 male  mascu… Tatooi…
+##  3 Leia Organa    150    49 brown   light   brown      19   fema… femin… Aldera…
+##  4 Owen Lars      178   120 brown,… light   blue       52   male  mascu… Tatooi…
+##  5 Beru White…    165    75 brown   light   blue       47   fema… femin… Tatooi…
+##  6 Biggs Dark…    183    84 black   light   brown      24   male  mascu… Tatooi…
+##  7 Obi-Wan Ke…    182    77 auburn… fair    blue-g…    57   male  mascu… Stewjon
+##  8 Anakin Sky…    188    84 blond   fair    blue       41.9 male  mascu… Tatooi…
+##  9 Wilhuff Ta…    180    NA auburn… fair    blue       64   male  mascu… Eriadu 
+## 10 Han Solo       180    80 brown   fair    brown      29   male  mascu… Corell…
+## # … with 29 more rows, 4 more variables: species <chr>, films <list>,
+## #   vehicles <list>, starships <list>, and abbreviated variable names
+## #   ¹​hair_color, ²​skin_color, ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+
+## Organize linhas com `arrange()`
+- Reordena as linhas a partir de um conjunto de nomes de coluna
+```yaml
+arrange(.data, ..., .by_group = FALSE)
+
+.data: A data frame, data frame extension (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
+... : <data-masking> Variables, or functions of variables. Use desc() to sort a variable in descending order.
+```
+- Se for inserido mais de um nome de variável, organiza de acordo com a 1ª variável e, em caso de ter linhas com o mesmo valor na 1ª variável, ordena estas linhas de mesmo valor de acordo com a 2ª variável
+- Para usar a ordem decrescente, temos a função `desc()`
+
+```r
+bd_sw2 = arrange(bd_sw1, height, desc(mass))
+bd_sw2
+```
+
+```
+## # A tibble: 31 × 14
+##    name        height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##    <chr>        <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+##  1 Leia Organa    150    49 brown   light   brown        19 fema… femin… Aldera…
+##  2 Mon Mothma     150    NA auburn  fair    blue         48 fema… femin… Chandr…
+##  3 Cordé          157    NA brown   light   brown        NA fema… femin… Naboo  
+##  4 Shmi Skywa…    163    NA black   fair    brown        72 fema… femin… Tatooi…
+##  5 Beru White…    165    75 brown   light   blue         47 fema… femin… Tatooi…
+##  6 Padmé Amid…    165    45 brown   light   brown        46 fema… femin… Naboo  
+##  7 Dormé          165    NA brown   light   brown        NA fema… femin… Naboo  
+##  8 Jocasta Nu     167    NA white   fair    blue         NA fema… femin… Corusc…
+##  9 Wedge Anti…    170    77 brown   fair    hazel        21 male  mascu… Corell…
+## 10 Palpatine      170    75 grey    pale    yellow       82 male  mascu… Naboo  
+## # … with 21 more rows, 4 more variables: species <chr>, films <list>,
+## #   vehicles <list>, starships <list>, and abbreviated variable names
+## #   ¹​hair_color, ²​skin_color, ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+
+
+## Selecione colunas com `select()`
+- Seleciona colunas que são de interesse.
+```yaml
+select(.data, ...)
+
+... : variables in a data frame
+: for selecting a range of consecutive variables.
+! for taking the complement of a set of variables.
+c() for combining selections.
+```
+- Coloca-se os nomes das colunas desejadas para selecioná-las.
+- Também é possível selecionar um intervalo de variáveis usando `var1:var2`
+- Caso queira tirar apenas algumas colunas, basta informar o nome delas precedidas pelo sinal de subtração (`-var`)
+
+```r
+bd_sw3 = select(bd_sw2, name:eye_color, sex:species)
+# equivalente: select(bd_sw2, -birth_year, -c(films:starships))
+bd_sw3
+```
+
+```
+## # A tibble: 31 × 10
+##    name        height  mass hair_…¹ skin_…² eye_c…³ sex   gender homew…⁴ species
+##    <chr>        <int> <dbl> <chr>   <chr>   <chr>   <chr> <chr>  <chr>   <chr>  
+##  1 Leia Organa    150    49 brown   light   brown   fema… femin… Aldera… Human  
+##  2 Mon Mothma     150    NA auburn  fair    blue    fema… femin… Chandr… Human  
+##  3 Cordé          157    NA brown   light   brown   fema… femin… Naboo   Human  
+##  4 Shmi Skywa…    163    NA black   fair    brown   fema… femin… Tatooi… Human  
+##  5 Beru White…    165    75 brown   light   blue    fema… femin… Tatooi… Human  
+##  6 Padmé Amid…    165    45 brown   light   brown   fema… femin… Naboo   Human  
+##  7 Dormé          165    NA brown   light   brown   fema… femin… Naboo   Human  
+##  8 Jocasta Nu     167    NA white   fair    blue    fema… femin… Corusc… Human  
+##  9 Wedge Anti…    170    77 brown   fair    hazel   male  mascu… Corell… Human  
+## 10 Palpatine      170    75 grey    pale    yellow  male  mascu… Naboo   Human  
+## # … with 21 more rows, and abbreviated variable names ¹​hair_color, ²​skin_color,
+## #   ³​eye_color, ⁴​homeworld
+```
+- Note que o `select()` pode não funcionar corretamente se o pacote `MASS` estiver ativo. Caso esteja, retire a seleção do pacote `MASS` no quadrante inferior/direito em 'Packages' (ou digite `detach("package:MASS", unload = TRUE)`)
+- Uma outra forma de fazer a seleção de coluna é combinando com `starts_with()` e `ends_with()`, que resulta na seleção de colunas que se iniciam e terminam com um texto dado
+
+```r
+head( select(starwars, ends_with("color")) ) # colunas que terminam com color
+```
+
+```
+## # A tibble: 6 × 3
+##   hair_color  skin_color  eye_color
+##   <chr>       <chr>       <chr>    
+## 1 blond       fair        blue     
+## 2 <NA>        gold        yellow   
+## 3 <NA>        white, blue red      
+## 4 none        white       yellow   
+## 5 brown       light       brown    
+## 6 brown, grey light       blue
+```
+
+```r
+head( select(starwars, starts_with("s")) ) # colunas que iniciam com a letra "s"
+```
+
+```
+## # A tibble: 6 × 4
+##   skin_color  sex    species starships
+##   <chr>       <chr>  <chr>   <list>   
+## 1 fair        male   Human   <chr [2]>
+## 2 gold        none   Droid   <chr [0]>
+## 3 white, blue none   Droid   <chr [0]>
+## 4 white       male   Human   <chr [1]>
+## 5 light       female Human   <chr [0]>
+## 6 light       male   Human   <chr [0]>
+```
+
+## Renomeie colunas com `rename()`
+- Renomeia colunas usando `novo_nome = velho_nome`
+```yaml
+rename(.data, ...)
+
+.data: A data frame, data frame extension (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
+...	: For rename(): <tidy-select> Use new_name = old_name to rename selected variables.
+```
+
+
+```r
+bd_sw4 = rename(bd_sw3,
+                haircolor = hair_color,
+                skincolor = skin_color, 
+                eyecolor = eye_color)
+bd_sw4
+```
+
+```
+## # A tibble: 31 × 10
+##    name        height  mass hairc…¹ skinc…² eyeco…³ sex   gender homew…⁴ species
+##    <chr>        <int> <dbl> <chr>   <chr>   <chr>   <chr> <chr>  <chr>   <chr>  
+##  1 Leia Organa    150    49 brown   light   brown   fema… femin… Aldera… Human  
+##  2 Mon Mothma     150    NA auburn  fair    blue    fema… femin… Chandr… Human  
+##  3 Cordé          157    NA brown   light   brown   fema… femin… Naboo   Human  
+##  4 Shmi Skywa…    163    NA black   fair    brown   fema… femin… Tatooi… Human  
+##  5 Beru White…    165    75 brown   light   blue    fema… femin… Tatooi… Human  
+##  6 Padmé Amid…    165    45 brown   light   brown   fema… femin… Naboo   Human  
+##  7 Dormé          165    NA brown   light   brown   fema… femin… Naboo   Human  
+##  8 Jocasta Nu     167    NA white   fair    blue    fema… femin… Corusc… Human  
+##  9 Wedge Anti…    170    77 brown   fair    hazel   male  mascu… Corell… Human  
+## 10 Palpatine      170    75 grey    pale    yellow  male  mascu… Naboo   Human  
+## # … with 21 more rows, and abbreviated variable names ¹​haircolor, ²​skincolor,
+## #   ³​eyecolor, ⁴​homeworld
+```
+
+
+## Modifique/Adicione colunas com `mutate()`
+- Modifica uma coluna se ela já existir
+- Cria uma coluna se ela não existir
+```yaml
+mutate(.data, ...)
+
+.data: A data frame, data frame extension (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
+...	: <data-masking> Name-value pairs. The name gives the name of the column in the output. The value can be:
+ - A vector of length 1, which will be recycled to the correct length.
+ - A vector the same length as the current group (or the whole data frame if ungrouped).
+ - NULL, to remove the column.
+```
+
+```r
+bd_sw5 = mutate(bd_sw4,
+                height = height/100, # transf cm p/ metro
+                BMI = mass / height^2,
+                dummy = 1 # se não for vetor, tudo fica igual
+                )
+bd_sw5 = select(bd_sw5, BMI, dummy, everything()) # facilitar
+bd_sw5
+```
+
+```
+## # A tibble: 31 × 12
+##      BMI dummy name    height  mass hairc…¹ skinc…² eyeco…³ sex   gender homew…⁴
+##    <dbl> <dbl> <chr>    <dbl> <dbl> <chr>   <chr>   <chr>   <chr> <chr>  <chr>  
+##  1  21.8     1 Leia O…   1.5     49 brown   light   brown   fema… femin… Aldera…
+##  2  NA       1 Mon Mo…   1.5     NA auburn  fair    blue    fema… femin… Chandr…
+##  3  NA       1 Cordé     1.57    NA brown   light   brown   fema… femin… Naboo  
+##  4  NA       1 Shmi S…   1.63    NA black   fair    brown   fema… femin… Tatooi…
+##  5  27.5     1 Beru W…   1.65    75 brown   light   blue    fema… femin… Tatooi…
+##  6  16.5     1 Padmé …   1.65    45 brown   light   brown   fema… femin… Naboo  
+##  7  NA       1 Dormé     1.65    NA brown   light   brown   fema… femin… Naboo  
+##  8  NA       1 Jocast…   1.67    NA white   fair    blue    fema… femin… Corusc…
+##  9  26.6     1 Wedge …   1.7     77 brown   fair    hazel   male  mascu… Corell…
+## 10  26.0     1 Palpat…   1.7     75 grey    pale    yellow  male  mascu… Naboo  
+## # … with 21 more rows, 1 more variable: species <chr>, and abbreviated variable
+## #   names ¹​haircolor, ²​skincolor, ³​eyecolor, ⁴​homeworld
+```
+
+## Operador Pipe `%>%`
+- Note que todas as funções do pacote `dyplr` anteriores têm como 1º argumento a base de dados (`.data`), e isto não é por acaso.
+- O operador pipe `%>%` joga um data frame (escrito à sua esquerda) no 1º argumento da função seguinte (à sua direita).
+
+```r
+filter(starwars, species=="Droid") # sem operador pipe
+```
+
+```
+## # A tibble: 6 × 14
+##   name   height  mass hair_color skin_color eye_c…¹ birth…² sex   gender homew…³
+##   <chr>   <int> <dbl> <chr>      <chr>      <chr>     <dbl> <chr> <chr>  <chr>  
+## 1 C-3PO     167    75 <NA>       gold       yellow      112 none  mascu… Tatooi…
+## 2 R2-D2      96    32 <NA>       white, bl… red          33 none  mascu… Naboo  
+## 3 R5-D4      97    32 <NA>       white, red red          NA none  mascu… Tatooi…
+## 4 IG-88     200   140 none       metal      red          15 none  mascu… <NA>   
+## 5 R4-P17     96    NA none       silver, r… red, b…      NA none  femin… <NA>   
+## 6 BB8        NA    NA none       none       black        NA none  mascu… <NA>   
+## # … with 4 more variables: species <chr>, films <list>, vehicles <list>,
+## #   starships <list>, and abbreviated variable names ¹​eye_color, ²​birth_year,
+## #   ³​homeworld
+```
+
+```r
+starwars %>% filter(species=="Droid") # com operador pipe
+```
+
+```
+## # A tibble: 6 × 14
+##   name   height  mass hair_color skin_color eye_c…¹ birth…² sex   gender homew…³
+##   <chr>   <int> <dbl> <chr>      <chr>      <chr>     <dbl> <chr> <chr>  <chr>  
+## 1 C-3PO     167    75 <NA>       gold       yellow      112 none  mascu… Tatooi…
+## 2 R2-D2      96    32 <NA>       white, bl… red          33 none  mascu… Naboo  
+## 3 R5-D4      97    32 <NA>       white, red red          NA none  mascu… Tatooi…
+## 4 IG-88     200   140 none       metal      red          15 none  mascu… <NA>   
+## 5 R4-P17     96    NA none       silver, r… red, b…      NA none  femin… <NA>   
+## 6 BB8        NA    NA none       none       black        NA none  mascu… <NA>   
+## # … with 4 more variables: species <chr>, films <list>, vehicles <list>,
+## #   starships <list>, and abbreviated variable names ¹​eye_color, ²​birth_year,
+## #   ³​homeworld
+```
+- Observe que, ao usar o operador pipe, o 1º argumento com a base de dados não deve ser preenchida (já está sendo aplicada automaticamente via `%>%`).
+- Note que, desde a subseção com a função `filter()` até `mutate()` fomos "acumulando" as alterações em novos data frames, ou seja, o último data frame `bd_sw5` é a base original `starwars` que foi alterada por `filter()`, `arrange()`, `select()`, `rename()` e `mutate()`.
+
+```r
+bd_sw1 = filter(starwars, species == "Human", height >= 100)
+bd_sw2 = arrange(bd_sw1, height, desc(mass))
+bd_sw3 = select(bd_sw2, name:eye_color, sex:species)
+bd_sw4 = rename(bd_sw3,
+                haircolor = hair_color,
+                skincolor = skin_color, 
+                eyecolor = eye_color)
+bd_sw5 = mutate(bd_sw4,
+                height = height/100,
+                BMI = mass / height^2,
+                dummy = 1
+                )
+bd_sw5 = select(bd_sw5, BMI, dummy, everything())
+bd_sw5
+```
+
+```
+## # A tibble: 31 × 12
+##      BMI dummy name    height  mass hairc…¹ skinc…² eyeco…³ sex   gender homew…⁴
+##    <dbl> <dbl> <chr>    <dbl> <dbl> <chr>   <chr>   <chr>   <chr> <chr>  <chr>  
+##  1  21.8     1 Leia O…   1.5     49 brown   light   brown   fema… femin… Aldera…
+##  2  NA       1 Mon Mo…   1.5     NA auburn  fair    blue    fema… femin… Chandr…
+##  3  NA       1 Cordé     1.57    NA brown   light   brown   fema… femin… Naboo  
+##  4  NA       1 Shmi S…   1.63    NA black   fair    brown   fema… femin… Tatooi…
+##  5  27.5     1 Beru W…   1.65    75 brown   light   blue    fema… femin… Tatooi…
+##  6  16.5     1 Padmé …   1.65    45 brown   light   brown   fema… femin… Naboo  
+##  7  NA       1 Dormé     1.65    NA brown   light   brown   fema… femin… Naboo  
+##  8  NA       1 Jocast…   1.67    NA white   fair    blue    fema… femin… Corusc…
+##  9  26.6     1 Wedge …   1.7     77 brown   fair    hazel   male  mascu… Corell…
+## 10  26.0     1 Palpat…   1.7     75 grey    pale    yellow  male  mascu… Naboo  
+## # … with 21 more rows, 1 more variable: species <chr>, and abbreviated variable
+## #   names ¹​haircolor, ²​skincolor, ³​eyecolor, ⁴​homeworld
+```
+- Usando o operador pipe `%>%` várias vezes, podemos ir pegando o output resultante da aplicação de uma função e jogar como input da função seguinte. Reescreveremos o código acima "em única linha" com `%>%`, chegando ao mesmo data frame de `bd_sw5`
+
+```r
+bd_sw_pipe = starwars %>% 
+    filter(species == "Human", height >= 100) %>%
+    arrange(height, desc(mass)) %>%
+    select(name:eye_color, sex:species) %>%
+    rename(haircolor = hair_color,
+           skincolor = skin_color, 
+           eyecolor = eye_color) %>%
+    mutate(height = height/100,
+           BMI = mass / height^2,
+           dummy = 1
+           ) %>%
+    select(BMI, dummy, everything())
+bd_sw_pipe
+```
+
+```
+## # A tibble: 31 × 12
+##      BMI dummy name    height  mass hairc…¹ skinc…² eyeco…³ sex   gender homew…⁴
+##    <dbl> <dbl> <chr>    <dbl> <dbl> <chr>   <chr>   <chr>   <chr> <chr>  <chr>  
+##  1  21.8     1 Leia O…   1.5     49 brown   light   brown   fema… femin… Aldera…
+##  2  NA       1 Mon Mo…   1.5     NA auburn  fair    blue    fema… femin… Chandr…
+##  3  NA       1 Cordé     1.57    NA brown   light   brown   fema… femin… Naboo  
+##  4  NA       1 Shmi S…   1.63    NA black   fair    brown   fema… femin… Tatooi…
+##  5  27.5     1 Beru W…   1.65    75 brown   light   blue    fema… femin… Tatooi…
+##  6  16.5     1 Padmé …   1.65    45 brown   light   brown   fema… femin… Naboo  
+##  7  NA       1 Dormé     1.65    NA brown   light   brown   fema… femin… Naboo  
+##  8  NA       1 Jocast…   1.67    NA white   fair    blue    fema… femin… Corusc…
+##  9  26.6     1 Wedge …   1.7     77 brown   fair    hazel   male  mascu… Corell…
+## 10  26.0     1 Palpat…   1.7     75 grey    pale    yellow  male  mascu… Naboo  
+## # … with 21 more rows, 1 more variable: species <chr>, and abbreviated variable
+## #   names ¹​haircolor, ²​skincolor, ³​eyecolor, ⁴​homeworld
+```
+
+```r
+all(bd_sw_pipe == bd_sw5, na.rm=TRUE) # verificando se todos elementos são iguais
+```
+
+```
+## [1] TRUE
+```
+
+## Resuma com `summarise()`
+
+- Podemos usar a função `summarise()` para gerar alguma estatística acerca de uma ou mais variáveis:
+
+```r
+starwars %>% summarise(
+    n_obs = n(),
+    mean_height = mean(height, na.rm=TRUE),
+    mean_mass = mean(mass, na.rm=TRUE)
+    )
+```
+
+```
+## # A tibble: 1 × 3
+##   n_obs mean_height mean_mass
+##   <int>       <dbl>     <dbl>
+## 1    87        174.      97.3
+```
+- No caso acima, gerou simplesmente o tamanho da amostra e as médias de altura e de massa considerando a amostra inteira de `starwars` (o que não foi muito útil).
+
+
+## Agrupe com `group_by()`
+- Diferente das outras funções do `dplyr` mostradas até agora, o output do `group_by` não altera conteúdo do data frame, apenas **transforma em uma base de dados agrupada** em categorias de uma dada variável
+
+```r
+grouped_sw = starwars %>% group_by(sex)
+class(grouped_sw)
+```
+
+```
+## [1] "grouped_df" "tbl_df"     "tbl"        "data.frame"
+```
+
+```r
+head(starwars)
+```
+
+```
+## # A tibble: 6 × 14
+##   name         height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##   <chr>         <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+## 1 Luke Skywal…    172    77 blond   fair    blue       19   male  mascu… Tatooi…
+## 2 C-3PO           167    75 <NA>    gold    yellow    112   none  mascu… Tatooi…
+## 3 R2-D2            96    32 <NA>    white,… red        33   none  mascu… Naboo  
+## 4 Darth Vader     202   136 none    white   yellow     41.9 male  mascu… Tatooi…
+## 5 Leia Organa     150    49 brown   light   brown      19   fema… femin… Aldera…
+## 6 Owen Lars       178   120 brown,… light   blue       52   male  mascu… Tatooi…
+## # … with 4 more variables: species <chr>, films <list>, vehicles <list>,
+## #   starships <list>, and abbreviated variable names ¹​hair_color, ²​skin_color,
+## #   ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+
+```r
+head(grouped_sw) # agrupado por sexo
+```
+
+```
+## # A tibble: 6 × 14
+## # Groups:   sex [3]
+##   name         height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ sex   gender homew…⁵
+##   <chr>         <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> <chr>  <chr>  
+## 1 Luke Skywal…    172    77 blond   fair    blue       19   male  mascu… Tatooi…
+## 2 C-3PO           167    75 <NA>    gold    yellow    112   none  mascu… Tatooi…
+## 3 R2-D2            96    32 <NA>    white,… red        33   none  mascu… Naboo  
+## 4 Darth Vader     202   136 none    white   yellow     41.9 male  mascu… Tatooi…
+## 5 Leia Organa     150    49 brown   light   brown      19   fema… femin… Aldera…
+## 6 Owen Lars       178   120 brown,… light   blue       52   male  mascu… Tatooi…
+## # … with 4 more variables: species <chr>, films <list>, vehicles <list>,
+## #   starships <list>, and abbreviated variable names ¹​hair_color, ²​skin_color,
+## #   ³​eye_color, ⁴​birth_year, ⁵​homeworld
+```
+- O `group_by()` prepara o data frame para operações que consideram várias linhas. Como exemplo, vamos criar uma coluna com a soma de `mass` de todas observações
+
+```r
+starwars %>%
+    mutate(mean_mass = mean(mass, na.rm=TRUE)) %>% 
+    select(mean_mass, sex, everything()) %>%
+    head(10)
+```
+
+```
+## # A tibble: 10 × 15
+##    mean_mass sex    name     height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ gender
+##        <dbl> <chr>  <chr>     <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> 
+##  1      97.3 male   Luke Sk…    172    77 blond   fair    blue       19   mascu…
+##  2      97.3 none   C-3PO       167    75 <NA>    gold    yellow    112   mascu…
+##  3      97.3 none   R2-D2        96    32 <NA>    white,… red        33   mascu…
+##  4      97.3 male   Darth V…    202   136 none    white   yellow     41.9 mascu…
+##  5      97.3 female Leia Or…    150    49 brown   light   brown      19   femin…
+##  6      97.3 male   Owen La…    178   120 brown,… light   blue       52   mascu…
+##  7      97.3 female Beru Wh…    165    75 brown   light   blue       47   femin…
+##  8      97.3 none   R5-D4        97    32 <NA>    white,… red        NA   mascu…
+##  9      97.3 male   Biggs D…    183    84 black   light   brown      24   mascu…
+## 10      97.3 male   Obi-Wan…    182    77 auburn… fair    blue-g…    57   mascu…
+## # … with 5 more variables: homeworld <chr>, species <chr>, films <list>,
+## #   vehicles <list>, starships <list>, and abbreviated variable names
+## #   ¹​hair_color, ²​skin_color, ³​eye_color, ⁴​birth_year
+```
+- Note que todos os valores de `mean_mass` são iguais. Agora, agruparemos por `sex` antes de fazer a soma:
+
+```r
+starwars %>%
+    group_by(sex) %>%
+    mutate(mean_mass = mean(mass, na.rm=TRUE)) %>% 
+    ungroup() %>% # Lembre-se sempre de desagrupar depois!
+    select(mean_mass, sex, everything()) %>%
+    head(10)
+```
+
+```
+## # A tibble: 10 × 15
+##    mean_mass sex    name     height  mass hair_…¹ skin_…² eye_c…³ birth…⁴ gender
+##        <dbl> <chr>  <chr>     <int> <dbl> <chr>   <chr>   <chr>     <dbl> <chr> 
+##  1      81.0 male   Luke Sk…    172    77 blond   fair    blue       19   mascu…
+##  2      69.8 none   C-3PO       167    75 <NA>    gold    yellow    112   mascu…
+##  3      69.8 none   R2-D2        96    32 <NA>    white,… red        33   mascu…
+##  4      81.0 male   Darth V…    202   136 none    white   yellow     41.9 mascu…
+##  5      54.7 female Leia Or…    150    49 brown   light   brown      19   femin…
+##  6      81.0 male   Owen La…    178   120 brown,… light   blue       52   mascu…
+##  7      54.7 female Beru Wh…    165    75 brown   light   blue       47   femin…
+##  8      69.8 none   R5-D4        97    32 <NA>    white,… red        NA   mascu…
+##  9      81.0 male   Biggs D…    183    84 black   light   brown      24   mascu…
+## 10      81.0 male   Obi-Wan…    182    77 auburn… fair    blue-g…    57   mascu…
+## # … with 5 more variables: homeworld <chr>, species <chr>, films <list>,
+## #   vehicles <list>, starships <list>, and abbreviated variable names
+## #   ¹​hair_color, ²​skin_color, ³​eye_color, ⁴​birth_year
+```
+- Note que, agora, a coluna `mean_mass` tem valores diferentes de acordo com o sexo da observação.
+- Isso é útil em algumas aplicações econômicas em que consideramos variáveis a nível de grupo (e.g. domicílio) a qual uma observação (e.g. morador) pertence.
+
+> **Evite potenciais erros**: Sempre que usar `group_by()`, não se esqueça de desagrupar o data frame via função `ungroup()` após realizar a operações desejadas.
+
+## Resuma em grupos com `group_by()` e `summarise()`
+- A função `summarise()` é de fato útil quando combinada com a função `group_by()`, pois conseguimos obter as estatísticas de grupos:
+
+```r
+summary_sw = starwars %>% group_by(sex) %>%
+    summarise(
+        n_obs = n(),
+        mean_height = mean(height, na.rm = TRUE),
+        mean_mass = mean(mass, na.rm = TRUE)
+    )
+summary_sw
+```
+
+```
+## # A tibble: 5 × 4
+##   sex            n_obs mean_height mean_mass
+##   <chr>          <int>       <dbl>     <dbl>
+## 1 female            16        169.      54.7
+## 2 hermaphroditic     1        175     1358  
+## 3 male              60        179.      81.0
+## 4 none               6        131.      69.8
+## 5 <NA>               4        181.      48
+```
+
+```r
+class(summary_sw) # ao usar summary, deixa de ser agrupada
+```
+
+```
+## [1] "tbl_df"     "tbl"        "data.frame"
+```
+- Note que, ao usar `summarise()`, o data frame resultante não é agrupado e, portanto, não é necessário usar `ungroup()` neste caso.
+- Também é possível adicionar mais de uma variável para agrupar:
+
+```r
+starwars %>% group_by(sex, hair_color) %>%
+    summarise(
+        n_obs = n(),
+        mean_height = mean(height, na.rm = TRUE),
+        mean_mass = mean(mass, na.rm = TRUE)
+    )
+```
+
+```
+## `summarise()` has grouped output by 'sex'. You can override using the `.groups`
+## argument.
+```
+
+```
+## # A tibble: 23 × 5
+## # Groups:   sex [5]
+##    sex            hair_color    n_obs mean_height mean_mass
+##    <chr>          <chr>         <int>       <dbl>     <dbl>
+##  1 female         auburn            1        150      NaN  
+##  2 female         black             3        166.      53.1
+##  3 female         blonde            1        168       55  
+##  4 female         brown             6        160.      56.3
+##  5 female         none              4        188.      54  
+##  6 female         white             1        167      NaN  
+##  7 hermaphroditic <NA>              1        175     1358  
+##  8 male           auburn, grey      1        180      NaN  
+##  9 male           auburn, white     1        182       77  
+## 10 male           black             9        176.      81.0
+## # … with 13 more rows
+```
+- Para agrupar variáveis **contínuas**, precisamos definir intervalos usando a função `cut()`
+```yaml
+cut(x, ...)
+
+x: a numeric vector which is to be converted to a factor by cutting.
+
+breaks: either a numeric vector of two or more unique cut points or a single number (greater than or equal to 2) giving the number of intervals into which x is to be cut.
+```
+
+```r
+# breaks com um integer = qtd desejada de grupos
+starwars %>% group_by(cut(birth_year, breaks=5)) %>%
+    summarise(
+        n_obs = n(),
+        mean_height = mean(height, na.rm = TRUE)
+    )
+```
+
+```
+## # A tibble: 5 × 3
+##   `cut(birth_year, breaks = 5)` n_obs mean_height
+##   <fct>                         <int>       <dbl>
+## 1 (7.11,186]                       40        175.
+## 2 (186,363]                         1        228 
+## 3 (541,718]                         1        175 
+## 4 (718,897]                         1         66 
+## 5 <NA>                             44        176.
+```
+
+```r
+# breaks com um vetor = quebras dos intervalos dos grupos
+starwars %>% group_by(birth_year=cut(birth_year, 
+                          breaks=c(0, 40, 90, 200, 900))) %>%
+    summarise(
+        n_obs = n(),
+        mean_height = mean(height, na.rm = TRUE)
+    )
+```
+
+```
+## # A tibble: 5 × 3
+##   birth_year n_obs mean_height
+##   <fct>      <int>       <dbl>
+## 1 (0,40]        13        164.
+## 2 (40,90]       22        179.
+## 3 (90,200]       6        192.
+## 4 (200,900]      2        120.
+## 5 <NA>          44        176.
+```
+- Note que inserimos `birth_year=cut(birth_year, ...)` para que o nome da coluna ficasse `birth_year`, caso contrário a coluna ficaria com o nome `cut(birth_year, ...)`.
+
+
+## Junte bases de dados com funções _join_
+- Vimos anteriormente que podemos usar o `cbind()` juntar um data frame com outro data frame (ou vetor), caso tenham o mesmo número de linhas
+- Para juntar linhas (considerando que as colunas possuem as mesmas classes de variáveis), podemos usar o `rbind`
+- Para agrupar bases de dados a partir de variáveis-chave, usamos a função `merge()`.
+- O pacote `dplyr` fornece uma família de funções _join_ que executam o mesmo comando que `merge()`, porém, ao invés de alterar o valor de um argumento, você precisa escolher uma das funções _join_ que podem ser resumidas na seguinte figura:
+
+
+<center><img src="https://fhnishida.github.io/fearp/eco1/dplyr-data-join-functions.png"></center>
+
+- Todas as funções possuem a mesma sintaxe:
+    - `x`: base 1
+    - `y`: base 2
+    - `by`: vetor de variáveis-chave
+    - `suffix`: vetor de 2 sufixos para incluir em colunas de mesmos nomes
+- Como exemplo, usaremos subconjuntos da base de dados `starwars`:
+
+```r
+bd1 = starwars[1:6, c(1, 3, 11)]
+bd2 = starwars[c(2, 4, 7:10), c(1:2, 6)]
+bd1
+```
+
+```
+## # A tibble: 6 × 3
+##   name            mass species
+##   <chr>          <dbl> <chr>  
+## 1 Luke Skywalker    77 Human  
+## 2 C-3PO             75 Droid  
+## 3 R2-D2             32 Droid  
+## 4 Darth Vader      136 Human  
+## 5 Leia Organa       49 Human  
+## 6 Owen Lars        120 Human
+```
+
+```r
+bd2
+```
+
+```
+## # A tibble: 6 × 3
+##   name               height eye_color
+##   <chr>               <int> <chr>    
+## 1 C-3PO                 167 yellow   
+## 2 Darth Vader           202 yellow   
+## 3 Beru Whitesun lars    165 blue     
+## 4 R5-D4                  97 red      
+## 5 Biggs Darklighter     183 brown    
+## 6 Obi-Wan Kenobi        182 blue-gray
+```
+- Note que há 12 personagens únicos em ambas bases, mas apenas "C-3PO" e "Darth Vader" são observações comuns.
+- `inner_join()`: mantém apenas ID's presentes simultaneamente em ambas bases
+
+```r
+inner_join(bd1, bd2, by="name")
+```
+
+```
+## # A tibble: 2 × 5
+##   name         mass species height eye_color
+##   <chr>       <dbl> <chr>    <int> <chr>    
+## 1 C-3PO          75 Droid      167 yellow   
+## 2 Darth Vader   136 Human      202 yellow
+```
+
+- `full_join()`: mantém todas ID's, mesmo que estejam em apenas em um das bases
+
+```r
+full_join(bd1, bd2, by="name")
+```
+
+```
+## # A tibble: 10 × 5
+##    name                mass species height eye_color
+##    <chr>              <dbl> <chr>    <int> <chr>    
+##  1 Luke Skywalker        77 Human       NA <NA>     
+##  2 C-3PO                 75 Droid      167 yellow   
+##  3 R2-D2                 32 Droid       NA <NA>     
+##  4 Darth Vader          136 Human      202 yellow   
+##  5 Leia Organa           49 Human       NA <NA>     
+##  6 Owen Lars            120 Human       NA <NA>     
+##  7 Beru Whitesun lars    NA <NA>       165 blue     
+##  8 R5-D4                 NA <NA>        97 red      
+##  9 Biggs Darklighter     NA <NA>       183 brown    
+## 10 Obi-Wan Kenobi        NA <NA>       182 blue-gray
+```
+- `left_join()`: mantém apenas ID's presentes na base 1 (informada como `x`)
+
+```r
+left_join(bd1, bd2, by="name")
+```
+
+```
+## # A tibble: 6 × 5
+##   name            mass species height eye_color
+##   <chr>          <dbl> <chr>    <int> <chr>    
+## 1 Luke Skywalker    77 Human       NA <NA>     
+## 2 C-3PO             75 Droid      167 yellow   
+## 3 R2-D2             32 Droid       NA <NA>     
+## 4 Darth Vader      136 Human      202 yellow   
+## 5 Leia Organa       49 Human       NA <NA>     
+## 6 Owen Lars        120 Human       NA <NA>
+```
+- `right_join()`: mantém apenas ID's presentes na base 2 (informada como `y`)
+
+```r
+right_join(bd1, bd2, by="name")
+```
+
+```
+## # A tibble: 6 × 5
+##   name                mass species height eye_color
+##   <chr>              <dbl> <chr>    <int> <chr>    
+## 1 C-3PO                 75 Droid      167 yellow   
+## 2 Darth Vader          136 Human      202 yellow   
+## 3 Beru Whitesun lars    NA <NA>       165 blue     
+## 4 R5-D4                 NA <NA>        97 red      
+## 5 Biggs Darklighter     NA <NA>       183 brown    
+## 6 Obi-Wan Kenobi        NA <NA>       182 blue-gray
+```
+
+- Note que podemos incluir mais de uma variável-chave para correspondência entre ID's de ambas bases. Primeiro, vamos construir as bases como paineis
+
+```r
+bd1 = starwars[1:5, c(1, 3)]
+bd1 = rbind(bd1, bd1) %>%
+    mutate(year = c(rep(2021, 5), rep(2022, 5)),
+           # Se não for ano 2021, multiplica por um número aleatório ~ N(1, 0.025)
+           mass = ifelse(year == 2021, mass, mass*rnorm(10, 1, 0.025))) %>%
+    select(name, year, mass) %>%
+    arrange(name, year)
+bd1
+```
+
+```
+## # A tibble: 10 × 3
+##    name            year  mass
+##    <chr>          <dbl> <dbl>
+##  1 C-3PO           2021  75  
+##  2 C-3PO           2022  74.1
+##  3 Darth Vader     2021 136  
+##  4 Darth Vader     2022 138. 
+##  5 Leia Organa     2021  49  
+##  6 Leia Organa     2022  48.2
+##  7 Luke Skywalker  2021  77  
+##  8 Luke Skywalker  2022  77.3
+##  9 R2-D2           2021  32  
+## 10 R2-D2           2022  31.6
+```
+
+```r
+bd2 = starwars[c(2, 4, 7:9), 1:2]
+bd2 = rbind(bd2, bd2) %>%
+    mutate(year = c(rep(2021, 5), rep(2022, 5)),
+           # Se não for ano 2021, altura cresce 2%
+           height = ifelse(year == 2021, height, height*1.02)) %>%
+    select(name, year, height) %>%
+    arrange(name, year)
+bd2
+```
+
+```
+## # A tibble: 10 × 3
+##    name                year height
+##    <chr>              <dbl>  <dbl>
+##  1 Beru Whitesun lars  2021  165  
+##  2 Beru Whitesun lars  2022  168. 
+##  3 Biggs Darklighter   2021  183  
+##  4 Biggs Darklighter   2022  187. 
+##  5 C-3PO               2021  167  
+##  6 C-3PO               2022  170. 
+##  7 Darth Vader         2021  202  
+##  8 Darth Vader         2022  206. 
+##  9 R5-D4               2021   97  
+## 10 R5-D4               2022   98.9
+```
+- Note agora que, para cada personagem, temos 2 linhas que correspondem aos dois anos (2021 e 2022). Faremos um `full_join()` considerando como variáveis-chave ambos `name` e `year`.
+
+```r
+# Juntando as bases
+full_join(bd1, bd2, by=c("name", "year"))
+```
+
+```
+## # A tibble: 16 × 4
+##    name                year  mass height
+##    <chr>              <dbl> <dbl>  <dbl>
+##  1 C-3PO               2021  75    167  
+##  2 C-3PO               2022  74.1  170. 
+##  3 Darth Vader         2021 136    202  
+##  4 Darth Vader         2022 138.   206. 
+##  5 Leia Organa         2021  49     NA  
+##  6 Leia Organa         2022  48.2   NA  
+##  7 Luke Skywalker      2021  77     NA  
+##  8 Luke Skywalker      2022  77.3   NA  
+##  9 R2-D2               2021  32     NA  
+## 10 R2-D2               2022  31.6   NA  
+## 11 Beru Whitesun lars  2021  NA    165  
+## 12 Beru Whitesun lars  2022  NA    168. 
+## 13 Biggs Darklighter   2021  NA    183  
+## 14 Biggs Darklighter   2022  NA    187. 
+## 15 R5-D4               2021  NA     97  
+## 16 R5-D4               2022  NA     98.9
+```
+- Atente-se também aos nomes das variáveis, pois ao juntar bases com variáveis de mesmos nomes (que não são usadas como chave), a função acaba incluindo ambas variáveis renomeadas, por padrão, com sufixos `.x` e `.y` (sufixos podem ser alterados pelo argumento `suffix`)
+
+```r
+bd2 = bd2 %>% mutate(mass = rnorm(10)) # Criando uma variável mass
+
+full_join(bd1, bd2, by=c("name", "year"))
+```
+
+```
+## # A tibble: 16 × 5
+##    name                year mass.x height  mass.y
+##    <chr>              <dbl>  <dbl>  <dbl>   <dbl>
+##  1 C-3PO               2021   75    167   -0.936 
+##  2 C-3PO               2022   74.1  170.   1.10  
+##  3 Darth Vader         2021  136    202   -0.476 
+##  4 Darth Vader         2022  138.   206.  -0.709 
+##  5 Leia Organa         2021   49     NA   NA     
+##  6 Leia Organa         2022   48.2   NA   NA     
+##  7 Luke Skywalker      2021   77     NA   NA     
+##  8 Luke Skywalker      2022   77.3   NA   NA     
+##  9 R2-D2               2021   32     NA   NA     
+## 10 R2-D2               2022   31.6   NA   NA     
+## 11 Beru Whitesun lars  2021   NA    165   -1.45  
+## 12 Beru Whitesun lars  2022   NA    168.   0.575 
+## 13 Biggs Darklighter   2021   NA    183   -1.02  
+## 14 Biggs Darklighter   2022   NA    187.  -0.0151
+## 15 R5-D4               2021   NA     97   -0.501 
+## 16 R5-D4               2022   NA     98.9 -1.63
+```
+
+
+# Gráficos
+- [Exploratory graphs - Part 1 (John Hopkins/Coursera)](https://www.coursera.org/learn/exploratory-data-analysis/lecture/ilRAK/exploratory-graphs-part-1)
+- [Base plotting system - Part 2 (John Hopkins/Coursera)](https://www.coursera.org/learn/exploratory-data-analysis/lecture/m4P1I/base-plotting-system-part-2)
+- [Base plotting demonstration (John Hopkins/Coursera)](https://www.coursera.org/learn/exploratory-data-analysis/lecture/yUFDH/base-plotting-demonstration)
+
+
+- [Aplicações R Base (The R Graph Gallery)](https://r-graph-gallery.com/base-R.html)
+- Objetivos dos gráficos em análise de dados:
+    1. Entender as propriedades dos dados
+    2. Encontrar padrões nos dados
+    3. Sugerir estratégias de modelagem
+    4. Analisar "bugs"
+    5. Comunicar resultados
+
+## Gráficos para Análise Exploratória de Dados (EDA)
+- Os gráficos para análise exploratória abrangem os 4 primeiros objetivos, ou seja, não são para comunicar um resultado final do seu trabalho.
+- Características:
+    1. Feitas rapidamente e em grande quantidade
+    2. O objetivo é o entendimento dos dados
+    3. Eixos/legendas normalmente são retiradas
+    4. Cores/tamanhos são primariamente usadas para informação
+- Principais gráficos simples:
+    a. Diagrama de caixa (_Boxplot_)
+    b. Histogramas
+    c. Gráfico de barra (_Barplot_)
+    d. Gráfico de dispersão (_Scatterplot_)
+
+Como exemplo, usaremos dados da Agência de Proteção Ambiental dos EUA (EPA), [avgpm25.csv](https://fhnishida.github.io/fearp/eco1/avgpm25.csv), que informa a quantidade de poluição por partícula fina (PM2.5). A média anual de PM2.5 que não pode exceder 12 $\mu g/m^3$. 
+
+
+```r
+library(dplyr)
+pollution = read.csv("https://fhnishida.github.io/fearp/eco1/avgpm25.csv")
+summary(pollution)
+```
+
+```
+##       pm25             fips          region            longitude      
+##  Min.   : 3.383   Min.   : 1003   Length:576         Min.   :-158.04  
+##  1st Qu.: 8.549   1st Qu.:16038   Class :character   1st Qu.: -97.38  
+##  Median :10.047   Median :28034   Mode  :character   Median : -87.37  
+##  Mean   : 9.836   Mean   :28431                      Mean   : -91.65  
+##  3rd Qu.:11.356   3rd Qu.:41045                      3rd Qu.: -80.72  
+##  Max.   :18.441   Max.   :56039                      Max.   : -68.26  
+##     latitude    
+##  Min.   :19.68  
+##  1st Qu.:35.30  
+##  Median :39.09  
+##  Mean   :38.56  
+##  3rd Qu.:41.75  
+##  Max.   :64.82
+```
+
+### Diagrama de caixa (_Boxplot_)
+- Apresenta mínimo, máximo, os quartis e outliers.
+
+```r
+boxplot(pollution$pm25, col="blue")
+abline(h=12, col="red") # Linha horizontal no valor 12
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-151-1.png" width="672" />
+- Para múltiplos boxplots, usamos `<variável_numérica> ~ <variável categórica>`:
+
+
+```r
+boxplot(pollution$pm25 ~ pollution$region, col="blue")
+abline(h=12, col="red") # Linha horizontal no valor 12
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-152-1.png" width="672" />
+
+
+
+### Histograma
+
+```r
+hist(pollution$pm25, col="green")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-153-1.png" width="672" />
+
+```r
+hist(pollution$pm25, col="green", breaks=100) # 100 quebras
+rug(pollution$pm25) # Traços dos valores da amostra abaixo do histograma 
+abline(v=12, col="red") # Linha vertical no valor 12
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-153-2.png" width="672" />
+- Podemos colocar mais de um gráfico numa figura usando a função `par(mfrow, mar)`:
+
+```r
+par(mfrow=c(2, 1), mar=c(4, 4, 2, 1)) # Criando figura com 2 linhas e 1 coluna + margens
+
+pol_west = pollution %>% filter(region == "west")
+pol_east = pollution %>% filter(region == "east")
+
+hist(pol_west$pm25, col="green")
+hist(pol_east$pm25, col="green")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-154-1.png" width="672" />
+
+- Note que você precisa usar `par(mfrow=c(1, 1))` para voltar a incluir apenas 1 gráfico na figura. 
+
+
+### Gráfico de barra (_Barplot_)
+
+```r
+barplot(table(pollution$region), col="wheat",
+        main="Nº de países em cada região")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-155-1.png" width="672" />
+
+
+
+### Gráfico de dispersão (_Scatterplot_)
+- Gera gráficos sob 2 dimensões
+
+```r
+plot(pollution$latitude, pollution$pm25)
+abline(h=12, lwd=1.5, lty=2, col="red")
+abline(lm(pm25 ~ latitude, data=pollution), col="blue")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-156-1.png" width="672" />
+
+
+```r
+par(mfrow=c(1, 2), mar=c(4, 4, 2, 1)) # Criando figura com 1 linha e 2 colunas + margens
+
+plot(pol_west$latitude, pol_west$pm25, main="West")
+plot(pol_east$latitude, pol_east$pm25, main="East")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-157-1.png" width="672" />
+
+- Também é possível adicionar objetos gráficos e textos no gráfico gerado por `plot()`:
+    - `abline()`: adiciona linhas horizontal, vertical ou de regressão
+    - `points()`: adiciona pontos ao gráfico
+    - `lines()`: adiciona linhas ao gráfico
+    - `text()`: adiciona texto ao gráfico
+    - `title()`: adiciona anotações aos eixos, título, subtítulo e margem exterior
+    - `mtext()`: adiciona texto às margens (interna e externa) do gráfico
+    - `axis()`: adiciona traços/rótulos aos eixos
+
+
+```r
+par(mfrow=c(1, 1)) # Retornando ao padrão
+
+air_may = airquality %>% filter(Month==5)
+air_other = airquality %>% filter(Month!=5)
+
+plot(airquality$Wind, airquality$Ozone, main="Ozone and Wind in NYC")
+points(air_may$Wind, air_may$Ozone, col="blue")
+points(air_other$Wind, air_other$Ozone, col="red")
+legend("topright", pch=1, col=c("blue", "red"), legend=c("May", "Other Months"))
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-158-1.png" width="672" />
+
+
+Alguns parâmetros gráficos importantes:
+
+- `pch`: símbolo dos pontos gráficos (padrão é círculo)
+- `lty`: tipo da linha (padrão é linha sólida, mais pode ser pontilhado, etc.)
+- `lwd`: grossura da linha (integer)
+- `col`: cor, especificada como número, texto ou código hex (função `colors()` dá um vetor de cores por nome)
+- `xlab`: rótulo do eixo x
+- `ylab`: rótulo do eixo y
+- `par()`: função que especifica parâmetros *globais* que afetam todas figuras:
+    - `las`: orientação dos rótulos 
+    - `bg`: cor de fundo
+    - `mar`: tamanho da margem
+    - `oma`: tamanho da margem externa (padrão é 0)
+    - `mfrow`: número de gráficos por linha
+    - `mfcol`: número de gráficos por coluna
+
+
+
+## Grammar of Graphics (pacote `ggplot2`)
+- [_ggplot2_ - Part 3 (John Hopkins/Coursera)](https://www.coursera.org/learn/exploratory-data-analysis/lecture/idcsq/ggplot2-part-3)
+- [_ggplot2_ - Part 4 (John Hopkins/Coursera)](https://www.coursera.org/learn/exploratory-data-analysis/lecture/cj6RA/ggplot2-part-4)
+- [_ggplot2_ Cheat Sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-visualization.pdf)
+- [Aplicações _ggplot2_ (The R Graph Gallery)](https://r-graph-gallery.com/ggplot2-package.html)
+
+<!-- > ``In brief, the grammar tells us that a statistical graphic is a **mapping** from data to **aesthetic** attributes (colour, shape, size) of **geometric** objects (points, lines, bars). The plot may also contain statistical transformations of the data and is drawn on a specific coordinate system'' (from _ggplot2_ book) -->
+
+- Componentes básicos do `ggplot2`:
+    - um **data frame**
+    - estética (**aesthetics**): como os dados são mapeados (tamanho, forma, cor)
+    - objetos geométricos (**geoms**): pontos, linhas, formas
+    - **facets**: para gráficos condicionais
+- Ao invés de criar um gráfico diretamente, os gráficos do `ggplot2` são construídos em camadas (layers)
+
+<!-- - transformações estatísticas (**stats**): como quantis, suavizamento, etc. -->
+<!-- - escalas (**scales**): qual escala um mapa estético usa (exemplo: homem = vermelho, mulher = azul) -->
+<!-- - sistema de coordenada (para mapas) -->
+
+1. Data Frame
+
+```r
+head(mtcars)
+```
+
+```
+##                    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+## Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+## Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+## Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+```
+
+2. Base do Gráfico (`ggplot()`)
+    - dados que serão incluídos no gráfico
+    - toda vez que for incluir uma variável, é necessário precisa usar a função `aes()` sobre elas
+
+```r
+library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 4.2.2
+```
+
+```r
+g = ggplot(data=mtcars, aes(mpg, wt)) # Criando a base do gráfico
+g
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-160-1.png" width="672" />
+
+3. Layer geomético (`geom`)
+    - incluindos formas, linhas e pontos
+    - caso não sejam informadas novas variáveis, a função para criar um objeto geométrico irá usar as variáveis-base definidas na função `ggplot()` inicial
+    - Junta-se a base do gráfico com outras layers usando o sinal `+`
+
+```r
+g + geom_point()
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-161-1.png" width="672" />
+
+4. Layer de suavização/tendência (`smooth`)
+```yaml
+geom_smooth(
+  mapping = NULL, data = NULL, ...,
+  method = NULL, formula = NULL, se = TRUE, level = 0.95
+)
+
+mapping: Set of aesthetic mappings created by aes() or aes_(). If specified and inherit.aes = TRUE (the default), it is combined with the default mapping at the top level of the plot. You must supply mapping if there is no plot mapping.
+data: The data to be displayed in this layer. If NULL, the default, the data is inherited from the plot data as specified in the call to ggplot().
+method: Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function (...).
+formula: Formula to use in smoothing function, eg. y ~ x, y ~ poly(x, 2), y ~ log(x).
+se: Display confidence interval around smooth? (TRUE by default, see level to control.)
+level: Level of confidence interval to use (0.95 by default).
+```
+
+
+```r
+g + geom_point() + geom_smooth(method="lm") # suavização a partir de OLS
+```
+
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-162-1.png" width="672" />
+
+
+
+5. Layers condicionais
+Facets (usar `cyl`)
+
+
+```r
+g + geom_point() + geom_smooth(method="lm") + facet_grid(. ~ cyl) # agrupando por nº cilindros horizontalmente
+```
+
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-163-1.png" width="672" />
+
+```r
+g + geom_point() + geom_smooth(method="lm") + facet_grid(cyl ~ .) # agrupando por nº cilindros verticalmente
+```
+
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-163-2.png" width="672" />
+
+6. Anotações
+    - Rótulos: `xlab()`, `ylab()`, `labs()`, `ggtitle()`
+    - Cada _geom_ tem opções para modificar, mas use `theme()` para opções globais do gráfico. Use `?theme` e veja a quantidade de configurações você pode fazer no seu gráfico.
+    - Se quiser temas pré-definidos, há 2 templates padrão `theme_gray()` e `theme_bw()` (preto/branco). Também é possível usar outros usando o pacote `ggthemes`.
+
+```r
+g + geom_point() + ggthemes::theme_economist() + 
+    ylab("Peso (libras)") + xlab("Milhas por galão") +
+    ggtitle("Milhas por galão X Peso do carro")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-164-1.png" width="672" />
+
+
+7. Modificando Estética
+    - Dentro de cada _geom_, podemos definir a cor (`color`), o tamanho (`size`) e a transparência (`alpha`)
+
+```r
+g + geom_point(color="steelblue", size=9, alpha=0.4)
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-165-1.png" width="672" />
+
+```r
+g + geom_point(aes(color=cyl), size=9, alpha=0.4) # colorindo por variável - precisa usar aes()
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-165-2.png" width="672" />
+
+# ===========================
+
+# Distribuições
+- [Probability Distributions in R (Examples): PDF, CDF & Quantile Function (Statistics Globe)](https://statisticsglobe.com/probability-distributions-in-r)
+- [Basic Probability Distributions in R (Greg Graham)](https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html)
+
+- As funções relacionadas a distribuições são dadas por `<prefixo><nome da distribuição>`
+- Existem 4 prefixos que indicam qual ação será realizada:
+    - `d`: calcula a densidade da distribuição dada uma estatística
+    - `p`: calcula a probabilidade acumulada dada uma estatística
+    - `q`: calcula a estatística da distribuição (quantil) dada uma probabilidade 
+    - `r`: gera números aleatórios dada a distribuição
+- Existem diversas distribuições disponíveis no R:
+    - `norm`: Normal
+    - `bern`: Bernoulli (pacote `Rlab`)
+    - `binom`: Binomial
+    - `pois`: Poisson
+    - `chisq`: Qui-Quadrado ($\chi^2$)
+    - `t`: t-Student
+    - `f`: F
+    - `unif`: Uniforme
+    - `weibull`: Weibull
+    - `gamma`: Gamma
+    - `logis`: Logística
+    - `exp`: Exponencial
+- Seguem as principais distribuições e suas respectivas funções:
+
+| **Distribuição**   | **Densidade de Probabilidade** | **Distribuição Acumulada** | **Quantil**             |
+|--------------------|--------------------------------|----------------------------|-------------------------|
+| Normal             | `dnorm(x, mean, sd)`           | `pnorm(q, mean, sd)`       | `qnorm(p, mean, sd)`    |
+| Binomial           | `dbinom(x, size, prob)`        | `pbinom(q, size, prob)`    | `qbinom(p, size, prob)` |
+| Poisson            | `dpois(x, lambda)`             | `pnorm(q, lambda)`         | `qnorm(p, lambda)`      |
+| Qui-Quadrado       | `dchisq(x, df)`                | `pchisq(q, df)`            | `qchisq(p, df)`         |
+| t-Student          | `dt(x, df)`                    | `pt(q, df)`                | `qt(p, df)`             |
+| F                  | `df(x, df1, df2)`              | `pf(q, df1, df2)`          | `qf(p, df1, df2)`       |
+
+em que `x` e `q` são estatísticas de cada distribuição (quantis), e `p` é probabilidade.
+
+
+## Distribuição Normal
+- Criaremos gráficos com média $\mu = 0$ e desvio padrão $\sigma=1$
+- Então, neste caso, os quantis em `x` e `q` são escores padrão Z
+
+```r
+# Gerando sequências de valores de escores Z e de probabilidades
+Z = seq(-3.5, 3.5, by=0.1)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_norm = dnorm(Z, mean=0, sd=1)
+cdf_norm = pnorm(Z, mean=0, sd=1)
+qt_norm = qnorm(probs, mean=0, sd=1)
+
+# Gerando gráficos
+plot(Z, pdf_norm, type="l", col="blue", xlab="Escores padrão Z") # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-166-1.png" width="672" />
+
+```r
+plot(Z, cdf_norm, type="l", col="blue", xlab="Escores padrão Z") # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-166-2.png" width="672" />
+
+```r
+plot(probs, qt_norm, type="l", col="blue", ylab="Escores padrão Z") # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-166-3.png" width="672" />
+
+## Distribuição Binomial
+- Criaremos gráficos com taxa de sucesso de 50\% (`prob = 0.5`) e número de tentativas `size = 100`
+- Os quantis `x` e `q` são quantidades de sucessos
+
+```r
+# Gerando sequências de valores de quantis e de probabilidades
+quantis = seq(35, 65, by=1)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_binom = dbinom(quantis, size=100, prob=0.5)
+cdf_binom = pbinom(quantis, size=100, prob=0.5)
+qt_binom = qbinom(probs, size=100, prob=0.5)
+
+# Gerando gráficos
+plot(quantis, pdf_binom, type="l", col="blue", xlab="Sucessos") # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-167-1.png" width="672" />
+
+```r
+plot(quantis, cdf_binom, type="l", col="blue", xlab="Sucessos") # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-167-2.png" width="672" />
+
+```r
+plot(probs, qt_binom, type="l", col="blue", ylab="Sucessos") # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-167-3.png" width="672" />
+
+## Distribuição de Poisson
+- Criaremos gráficos com $\lambda = 2.5$ 
+- Os quantis `x` e `q` são números de ocorrências
+
+```r
+# Gerando sequências de valores de quantis e de probabilidades
+quantis = seq(0, 9, by=1)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_pois = dpois(quantis, lambda=2.5)
+cdf_pois = ppois(quantis, lambda=2.5)
+qt_pois = qpois(probs, lambda=2.5)
+
+# Gerando gráficos
+plot(quantis, pdf_pois, type="l", col="blue", xlab="Ocorrências") # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-168-1.png" width="672" />
+
+```r
+plot(quantis, cdf_pois, type="l", col="blue", xlab="Ocorrências") # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-168-2.png" width="672" />
+
+```r
+plot(probs, qt_pois, type="l", col="blue", ylab="Ocorrências") # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-168-3.png" width="672" />
+
+
+## Distribuição Qui-Quadrado
+- Criaremos gráficos com 10 graus de liberdade (`df = 10`)
+- Os quantis `x` e `q` são estatísticas de teste cumulativas de Pearson ($\chi^2$)
+
+```r
+# Gerando sequências de valores de quantis e de probabilidades
+quantis = seq(1, 30, by=0.1)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_chisq = dchisq(quantis, df=10)
+cdf_chisq = pchisq(quantis, df=10)
+qt_chisq = qchisq(probs, df=10)
+
+# Gerando gráficos
+plot(quantis, pdf_chisq, type="l", col="blue", xlab=expression(chi^2)) # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-169-1.png" width="672" />
+
+```r
+plot(quantis, cdf_chisq, type="l", col="blue", xlab=expression(chi^2)) # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-169-2.png" width="672" />
+
+```r
+plot(probs, qt_chisq, type="l", col="blue", ylab=expression(chi^2)) # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-169-3.png" width="672" />
+
+
+## Distribuição t-Student
+- Criaremos gráficos com 10 graus de liberdade (`df = 10`)
+- Os quantis `x` e `q` são estatísticas _t_
+- Quanto maior os graus de liberdade, mais se aproxima de uma normal (0, 1)
+
+
+```r
+# Gerando sequências de valores de quantis e de probabilidades
+quantis = seq(-4.1437, 4.1437, length=100)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_t = dt(quantis, df=10)
+cdf_t = pt(quantis, df=10)
+qt_t = qt(probs, df=10)
+
+# Gerando gráficos
+plot(quantis, pdf_t, type="l", col="blue", xlab="Estatística t") # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-170-1.png" width="672" />
+
+```r
+plot(quantis, cdf_t, type="l", col="blue", xlab="Estatística t") # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-170-2.png" width="672" />
+
+```r
+plot(probs, qt_t, type="l", col="blue", ylab="Estatística t") # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-170-3.png" width="672" />
+
+
+
+## Distribuição F
+- Criaremos gráficos com 10 e 15 graus de liberdade (`df1 = 10` e `df2 = 10`)
+- Os quantis `x` e `q` são estatísticas _F_
+
+```r
+# Gerando sequências de valores de quantis e de probabilidades
+quantis = seq(0.1230193, 6.080778, length=100)
+probs = seq(0.001, 0.999, by=0.001)
+
+# Calculando densidade, distribuição acumulada e quantis
+pdf_f = df(quantis, df1=10, df2=15)
+cdf_f = pf(quantis, df1=10, df2=15)
+qt_f = qf(probs, df1=10, df2=15)
+
+# Gerando gráficos
+plot(quantis, pdf_f, type="l", col="blue", xlab="Estatística F") # pdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-171-1.png" width="672" />
+
+```r
+plot(quantis, cdf_f, type="l", col="blue", xlab="Estatística F") # cdf
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-171-2.png" width="672" />
+
+```r
+plot(probs, qt_f, type="l", col="blue", ylab="Estatística F") # quantis
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-171-3.png" width="672" />
+
+
+# Estimação de Modelo Linear
+
+É necessário carregar o pacote `dplyr` para manipulação da base de dados abaixo.
+
+```r
+library(dplyr)
+```
+
+
+## Base de dados `mtcars`
+
+Usaremos dados extraídos da _Motor Trend_ US magazine de 1974, que analisa o
+consumo de combustível e 10 aspectos técnicos de 32 automóveis.
+
+No _R_, a base de dados já está incorporada ao programa e pode ser acessada pelo
+código `mtcars`, contendo a seguinte estrutura:
+
+> - _mpg_: milhas por galão
+> - _cyl_: número de cilindros 
+> - _disp_: deslocamento do motor
+> - _hp_: cavalos-vapor bruto
+> - _drat_: razão eixo traseiro
+> - _wt_: peso (1000 libras)
+> - _qsec_: tempo de 1/4 de milha
+> - _vs_: motor (0 = forma de V, 1 = reto)
+> - _am_: transmissão (0 = automático, 1 = manual)
+> - _gear_: número de marchas
+
+
+Façamos um resumo da base de dados:
+
+
+```r
+### Examinaremos a base da dados mtcars
+## Estrutura de mtcars
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+```r
+## Selecionando 3 variáveis e resumindo 
+mtcars %>% 
+  select(mpg, hp, wt) %>% 
+  summary()
+```
+
+```
+##       mpg              hp              wt       
+##  Min.   :10.40   Min.   : 52.0   Min.   :1.513  
+##  1st Qu.:15.43   1st Qu.: 96.5   1st Qu.:2.581  
+##  Median :19.20   Median :123.0   Median :3.325  
+##  Mean   :20.09   Mean   :146.7   Mean   :3.217  
+##  3rd Qu.:22.80   3rd Qu.:180.0   3rd Qu.:3.610  
+##  Max.   :33.90   Max.   :335.0   Max.   :5.424
+```
+
+```r
+## Plotando consumo de combustível (mpg) por potência do carro (hp)
+plot(mtcars$mpg, mtcars$hp, xlab="Milhas por galão (mpg)", ylab="Cavalos-vapor (hp)")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-173-1.png" width="672" />
+
+```r
+## Plotando consumo de combustível (mpg) por peso do carro (wt)
+plot(mtcars$mpg, mtcars$wt, xlab="Milhas por galão (mpg)", ylab="Libras (wt)")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-173-2.png" width="672" />
+
+Queremos estimar o seguinte modelo:
+$$ \text{mpg} = \beta_0 + \beta_1 \text{hp} + \beta_2 \text{wt} + \varepsilon  $$
+
+
+## Estimação por OLS
+
+### Usando a função `lm()`
+
+```
+lm(formula, data, subset, weights, na.action,
+   method = "qr", model = TRUE, x = FALSE, y = FALSE, qr = TRUE,
+   singular.ok = TRUE, contrasts = NULL, offset, ...)
+   
+formula: an object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted.
+data: an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model.
+weights: an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
+```
+- Em `formula` você irá inserir a variável dependente separada por `~` das variáveis independentes. Estas serão separadas por um `+`. Neste exemplo: `formula = mpg ~ hp + wt`
+  - Para incluir uma interação entre variáveis independentes, usa-se `<var1>:<var2>`. Por exemplo: `formula = mpg ~ hp + wt + hp:am`
+  - Para fazer uma alteraçao em alguma variável dentro da função `lm()`, usa-se `I()`. Por exemplo, para incluir também o peso do carro, _wt_, ao quadrado: `formula = mpg ~ hp + wt + I(wt^2)`
+- Em `data`, será atribuída uma base de dados e, em `weights`, é possível atribuir ponderações para cada observação (bastante comum em bases providas pelo IBGE, como PNAD e POF)
+
+Vamos regredir o consumo de combustível (_mpg_) pela potência (_hp_) e pelo peso (_wt_) do carro:
+
+```r
+## Rodar a regressao OLS
+fit_ols1 = lm(formula = mpg ~ hp + wt, data = mtcars)
+
+## Resumir os resultados da regressao
+summary(fit_ols1)
+```
+
+```
+## 
+## Call:
+## lm(formula = mpg ~ hp + wt, data = mtcars)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -3.941 -1.600 -0.182  1.050  5.854 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 37.22727    1.59879  23.285  < 2e-16 ***
+## hp          -0.03177    0.00903  -3.519  0.00145 ** 
+## wt          -3.87783    0.63273  -6.129 1.12e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.593 on 29 degrees of freedom
+## Multiple R-squared:  0.8268,	Adjusted R-squared:  0.8148 
+## F-statistic: 69.21 on 2 and 29 DF,  p-value: 9.109e-12
+```
+
+- É possível extrair informações da regressão:
+
+```r
+names(fit_ols1) # verificar todas informações contidas no objeto da regressão
+```
+
+```
+##  [1] "coefficients"  "residuals"     "effects"       "rank"         
+##  [5] "fitted.values" "assign"        "qr"            "df.residual"  
+##  [9] "xlevels"       "call"          "terms"         "model"
+```
+
+```r
+fit_ols1$coefficients # Estimativas
+```
+
+```
+## (Intercept)          hp          wt 
+## 37.22727012 -0.03177295 -3.87783074
+```
+
+```r
+summary(fit_ols1)$coefficients # Estimativas pelo summary()
+```
+
+```
+##                Estimate Std. Error   t value     Pr(>|t|)
+## (Intercept) 37.22727012 1.59878754 23.284689 2.565459e-20
+## hp          -0.03177295 0.00902971 -3.518712 1.451229e-03
+## wt          -3.87783074 0.63273349 -6.128695 1.119647e-06
+```
+
+```r
+head(fit_ols1$fitted.values) # valores ajustados
+```
+
+```
+##         Mazda RX4     Mazda RX4 Wag        Datsun 710    Hornet 4 Drive 
+##          23.57233          22.58348          25.27582          21.26502 
+## Hornet Sportabout           Valiant 
+##          18.32727          20.47382
+```
+
+```r
+head(fit_ols1$residuals) # resíduos
+```
+
+```
+##         Mazda RX4     Mazda RX4 Wag        Datsun 710    Hornet 4 Drive 
+##        -2.5723294        -1.5834826        -2.4758187         0.1349799 
+## Hornet Sportabout           Valiant 
+##         0.3727334        -2.3738163
+```
+
+#### Variáveis categóricas
+- Ao inserir **variáveis categóricas** na regressão, criam-se _dummies_ para cada categoria e retira-se uma delas para evitar problema de multicolinearidade:
+- No exemplo abaixo, transformaremos a variável de cilindros (_cyl_), que possui apenas 3 valores (4, 6, e 8), na classe _factor_.
+
+```r
+mtcars_factor1 = mtcars %>% mutate(cyl = factor(cyl))
+summary( lm(mpg ~ cyl, data=mtcars_factor1) )$coef
+```
+
+```
+##               Estimate Std. Error   t value     Pr(>|t|)
+## (Intercept)  26.663636  0.9718008 27.437347 2.688358e-22
+## cyl6         -6.920779  1.5583482 -4.441099 1.194696e-04
+## cyl8        -11.563636  1.2986235 -8.904534 8.568209e-10
+```
+- Note que criou apenas 2 _dummies_ de cilindros (_cyl6_ e _cyl8_), sendo que as suas estimativas são negativas e significativas em relação ao carro com 4 cilindros (_cyl4_) que é a caregoria omitida para evitar multicolinearidade.
+- Podemos também definir a categoria a ser omitida usando as funções:
+  - `factor(..., levels=c(...))`, quando transforma um vetor em factor (omite o 1º)
+  - `relevel(..., ref="")`, quando o vetor já é da classe factor e quer apenas alterar os níveis
+- Para omitir _cyl8_ fazemos:
+
+```r
+# Via relevel() - via factor já existente
+mtcars_factor1$cyl = relevel(mtcars_factor1$cyl, ref="8")
+summary( lm(mpg ~ cyl, data=mtcars_factor1) )$coef
+```
+
+```
+##              Estimate Std. Error   t value     Pr(>|t|)
+## (Intercept) 15.100000  0.8614094 17.529412 5.660681e-17
+## cyl4        11.563636  1.2986235  8.904534 8.568209e-10
+## cyl6         4.642857  1.4920048  3.111825 4.152209e-03
+```
+
+```r
+# Via factor() - omite o 1º nível
+mtcars_factor2 = mtcars %>% mutate(cyl = factor(cyl, levels = c(8, 4, 6)))
+summary( lm(mpg ~ cyl, data=mtcars_factor2) )$coef
+```
+
+```
+##              Estimate Std. Error   t value     Pr(>|t|)
+## (Intercept) 15.100000  0.8614094 17.529412 5.660681e-17
+## cyl4        11.563636  1.2986235  8.904534 8.568209e-10
+## cyl6         4.642857  1.4920048  3.111825 4.152209e-03
+```
+- Observe que as estimativas estão positivas agora, dado que a referência agora é _cyl8_
+
+#### Exportando output em LaTeX
+- Podemos usar os pacotes `stargazer` e `textreg` para gerar o output da regressão em LaTeX
+- As funções têm os mesmos nomes dos pacotes:
+```r
+stargazer::stargazer(fit_ols1)
+texreg::texreg(fit_ols1)
+```
+- Depois, copie o output e jogue num programa de LaTeX.
+
+
+### Estimação Analítica
+- [ResEcon 703](https://github.com/woerman/ResEcon703) - Week 2 (University of Massachusetts Amherst)
+
+#### 1. Construir matrizes de covariadas $X$ e da variável dependente $y$
+
+```r
+## Criando reg_data a partir de variáveis de mtcars + uma coluna de 1's (p/ constante)
+reg_data = mtcars %>% 
+  select(mpg, hp, wt) %>%  # Selecionando as variáveis dependente e independentes
+  mutate(constante = 1)  # Criando coluna de constante
+
+## Selecionando variáveis independentes no objeto X e convertendo em matriz (n x k)
+X = reg_data %>% 
+  select(constante, hp, wt) %>%  # Selecionando as covariadas X (incluindo constante)
+  as.matrix()  # Transformando em matrix
+
+## Selecionando a variável dependente no objeto y e convertendo em matriz (n x 1)
+y = reg_data %>% 
+  select(mpg) %>%  # Selecionando as covariadas X (incluindo constante)
+  as.matrix()  # Transformando em matrix
+
+## Visualização das primeiras linhas de y e X
+head(X)
+```
+
+```
+##                   constante  hp    wt
+## Mazda RX4                 1 110 2.620
+## Mazda RX4 Wag             1 110 2.875
+## Datsun 710                1  93 2.320
+## Hornet 4 Drive            1 110 3.215
+## Hornet Sportabout         1 175 3.440
+## Valiant                   1 105 3.460
+```
+
+```r
+head(y)
+```
+
+```
+##                    mpg
+## Mazda RX4         21.0
+## Mazda RX4 Wag     21.0
+## Datsun 710        22.8
+## Hornet 4 Drive    21.4
+## Hornet Sportabout 18.7
+## Valiant           18.1
+```
+
+
+#### 2. Estimador $\hat{\beta}$
+O estimador de OLS é dado por:
+$$ \hat{\beta} = (X'X)^{-1} X' y $$
+
+
+```r
+## Estimando os parametros beta
+beta_hat = solve(t(X) %*% X) %*% t(X) %*% y # solve() calcula a inversa
+beta_hat
+```
+
+```
+##                   mpg
+## constante 37.22727012
+## hp        -0.03177295
+## wt        -3.87783074
+```
+
+
+#### 3. Calcular os valores ajustados $\hat{y}$
+$$ \hat{y} = X\hat{\beta} $$
+
+```r
+## Calculando os valores ajustados de y
+y_hat = X %*% beta_hat
+colnames(y_hat) = "mpg_hat"
+head(y_hat)
+```
+
+```
+##                    mpg_hat
+## Mazda RX4         23.57233
+## Mazda RX4 Wag     22.58348
+## Datsun 710        25.27582
+## Hornet 4 Drive    21.26502
+## Hornet Sportabout 18.32727
+## Valiant           20.47382
+```
+
+
+#### 4. Calcular os resíduos $e$
+$$ \varepsilon = y - \hat{y} $$
+
+```r
+## Calculando os residuos
+e = y - y_hat
+colnames(e) = "e"
+head(e)
+```
+
+```
+##                            e
+## Mazda RX4         -2.5723294
+## Mazda RX4 Wag     -1.5834826
+## Datsun 710        -2.4758187
+## Hornet 4 Drive     0.1349799
+## Hornet Sportabout  0.3727334
+## Valiant           -2.3738163
+```
+
+
+#### 5. Calcular a variância do termo de erro $s^2$
+$$ \hat{\sigma}^2 = \frac{e'e}{n-k} $$
+
+```r
+## Estimando variancia do termo de erro
+sigma2 = t(e) %*% e / (nrow(X) - ncol(X))
+sigma2
+```
+
+```
+##          e
+## e 6.725785
+```
+
+
+#### 6. Calcular a matriz de covariâncias $\hat{Cov}(\widehat{\beta})$
+$$ \widehat{Cov}(\hat{\beta}) = \hat{\sigma}^2 (X'X)^{-1} $$
+
+```r
+## Estimando a matriz de variancia/covariancia das estimativas beta
+vcov_hat = c(sigma2) * solve(t(X) %*% X)
+vcov_hat
+```
+
+```
+##               constante            hp          wt
+## constante  2.5561215917  1.484701e-04 -0.73594515
+## hp         0.0001484701  8.153566e-05 -0.00376369
+## wt        -0.7359451464 -3.763690e-03  0.40035167
+```
+
+
+#### 7. Calcular erros padrão, estatísticas t, e p-valores
+
+```r
+## Calculando erros padrao das estimativas beta
+std_err = sqrt(diag(vcov_hat)) # Raiz da diagonal da matriz de covariâncias
+
+## Calculando estatisticas t das estimativas beta
+t_stat = beta_hat / std_err
+
+## Calculando p-valores das estimativas beta
+p_value = 2 * pt(q = -abs(t_stat), df = nrow(X) - ncol(X)) # 2 x acumulada até estatística t negativa
+
+## Organizando os resultados da regressao em uma matriz
+results = cbind(beta_hat, std_err, t_stat, p_value)
+
+## Nomeando as colunas da matriz de resultados
+colnames(results) = c('Estimate', 'Std. Error', 't stat', 'Pr(>|t|)')
+results
+```
+
+```
+##              Estimate Std. Error    t stat     Pr(>|t|)
+## constante 37.22727012 1.59878754 23.284689 2.565459e-20
+## hp        -0.03177295 0.00902971 -3.518712 1.451229e-03
+## wt        -3.87783074 0.63273349 -6.128695 1.119647e-06
+```
+
+
+### Estimação Numérica
+
+#### 1. Criar função perda que calcula a soma dos desvios quadráticos
+- A função para calcular a soma dos desvios quadráticos recebe como inputs:
+  - um **vetor** de possíveis valores para $\beta_0$, $\beta_1$ e $\beta_2$
+  - uma base de dados
+
+```r
+desv_quad = function(params, data) {
+  # Extraindo os parâmetros para objetos
+  beta_0 = params[1]
+  beta_1 = params[2]
+  beta_2 = params[3]
+  
+  mpg_ajustado = beta_0 + beta_1*data$hp + beta_2*data$wt # valores ajustados
+  desvios = data$mpg - mpg_ajustado # desvios = observados - ajustados
+  sum(desvios^2)
+}
+```
+
+
+#### 2. Otimização
+- Agora encontraremos os parâmetros que minimizam a função perda
+$$ \text{argmin}_{\theta \in \Theta} \sum_{i=1}^{N}\left( \text{mpg}_i - \widehat{\text{mpg}}_i \right)^2 $$
+<!-- tal que $\Theta = \{ \beta_0, \beta_1, \beta_2 \}$. -->
+- Para isto usaremos a função `optim()` que retorna os parâmetros que minimizam uma função (equivalente ao _argmin_):
+```yaml
+optim(par, fn, gr = NULL, ...,
+      method = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent"),
+      lower = -Inf, upper = Inf,
+      control = list(), hessian = FALSE)
+
+par: Initial values for the parameters to be optimized over.
+fn: A function to be minimized (or maximized), with first argument the vector of parameters over which minimization is to take place. It should return a scalar result.
+method: The method to be used. See ‘Details’. Can be abbreviated.
+hessian: Logical. Should a numerically differentiated Hessian matrix be returned?
+```
+- Colocaremos como input:
+  - a função perda criada `desv_quad()`
+  - um chute inicial dos parâmetros
+    - Note que a estimação pode ser mais ou menos sensível ao valores iniciais, dependendo do método de otimização utilizado
+    - O mais comum é encontrar como chute inicial um vetor de zeros `c(0, 0, 0)`, por ser mais neutro em relação ao sinal das estimativas
+    - Em Econometria III, prof. Laurini recomendou usar método "Nelder-Mead" (padrão) com um chute inicial de zeros e, depois, usar suas estimativas como chute inicial para o método "BFGS".
+  - Por padrão, temos o argumento `hessian = FALSE`, coloque `TRUE` para calcularmos o erro padrão, estatística t e p-valor das estimativas
+
+
+```r
+# Estimação por BFGS
+theta_ini = c(0, 0, 0) # Chute inicial de beta_0, beta_1 e beta_2
+
+fit_ols2 = optim(par=theta_ini, fn=desv_quad, data=mtcars,
+                  method="BFGS", hessian=TRUE)
+fit_ols2
+```
+
+```
+## $par
+## [1] 37.22727012 -0.03177295 -3.87783074
+## 
+## $value
+## [1] 195.0478
+## 
+## $counts
+## function gradient 
+##       34        6 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL
+## 
+## $hessian
+##          [,1]       [,2]       [,3]
+## [1,]   64.000    9388.00   205.9040
+## [2,] 9388.000 1668556.00 32943.4880
+## [3,]  205.904   32943.49   721.8021
+```
+
+
+<!-- ```{r} -->
+<!-- ## Calculando os erros padrão MLE -->
+<!-- fit_ols2_se = fit_ols2$hessian %>%  -->
+<!--   solve() %>%  -->
+<!--   diag() %>%  -->
+<!--   sqrt() -->
+
+<!-- ## Calculando as estatisticas z MLE -->
+<!-- fit_ols2_zstat = fit_ols2$par / fit_ols2_se -->
+
+<!-- ## Calculando os p-valores MLE -->
+<!-- fit_ols2_pvalue = 2 * pnorm(q = -abs(fit_ols2_zstat)) -->
+
+
+<!-- ## Montando tabela resumo -->
+<!-- summary_tab = matrix(0, length(fit_ols2$par), 4)  # criando matriz de zeros de dimensao 3 x 4 -->
+<!-- rownames(summary_tab) = c("beta_0", "beta_hp", "beta_wt") -->
+<!-- colnames(summary_tab) = c("Estimate", "Std. Error", "z value", "Pr(>|z|)") -->
+
+<!-- summary_tab[,1] = fit_ols2$par  # 1a coluna com coeficiente -->
+<!-- summary_tab[,2] = fit_ols2_se  # 2a coluna com erros padrao -->
+<!-- summary_tab[,3] = fit_ols2_zstat  # 3a coluna com estat. z -->
+<!-- summary_tab[,4] = fit_ols2_pvalue  # 4a coluna com p-valor -->
+
+<!-- round(summary_tab, 6) -->
+<!-- ``` -->
+
+<!-- - Cálculo do erro padrão também poderia ser feito por bootstrap -->
+<!-- ```{r} -->
+<!-- reps = 100 -->
+<!-- est_tab = matrix(0, reps, 3) -->
+
+<!-- for (i in 1:reps) { -->
+<!--   i_resample = sample(1:nrow(mtcars), nrow(mtcars), replace=TRUE) -->
+<!--   resample = mtcars[i_resample, c("mpg", "hp", "wt")] -->
+
+<!--   theta_ini = c(0, 0, 0) -->
+<!--   fit_resample = optim(par=theta_ini, fn=desv_quad, data=resample, -->
+<!--                        method="BFGS") -->
+
+<!--   est_tab[i,] = fit_resample$par -->
+<!-- } -->
+
+<!-- head(est_tab, 10) -->
+<!-- apply(est_tab, 2, sd) -->
+<!-- ``` -->
+
+## Métodos de Otimização Básicos
+- Essa seção tem o objetivo para dar uma intuição sobre métodos de otimização e está baseada em Hamilton (1994), seção 5.7.
+- Veremos os métodos de _grid search_ (discretização) e _steepest ascent_ que são métodos simples, mas que representam famílias de métodos de otimização.
+- Para maior profundidade no assunto, sugiro cursar disciplina de Economia Computacional.
+
+### _Grid Search_
+
+
+- O método mais simples de otimização numérica é o _grid search_ (discretização).
+- Como o R não lida com problemas com infinitos valores, uma forma lidar com isso é discretizando diversos possíveis valores dos parâmetros de escolha dentro de intervalos.
+- Para cada possível combinação de parâmetros, calculam-se diversos valores a partir da função objetivo. De todos os valores calculados, escolhe-se a combinação de parâmetros que maximizam (ou minimizam) a função objetivo.
+- O exemplo abaixo considera apenas um parâmetro de escolha $\theta$ e, para cada ponto escolhido dentro do intervalo $[-1, 1]$, calcula-se a função objetivo:
+
+<center><img src="https://fhnishida.github.io/fearp/eco1/grid_search.png"></center>
+
+- Este é um método robusto a funções com descontinuidades e quinas (não diferenciáveis), e menos sensível a chutes de valores iniciais. (ver método abaixo)
+- Porém, por ter que fazer cálculo da função objetivo para inúmeros pontos, tende a ser menos eficiente.
+
+
+### _Steepest Ascent_
+
+
+
+- Conforme o número de parâmetros do modelo cresce, aumenta o número de possíveis combinações entre parâmetros e torna o processo computacional cada vez mais lento.
+- Uma forma mais eficiente de encontrar o conjunto de parâmetros que otimizam a função objetivo é por meio do método _steepest ascent_.
+- Seja $\theta^*$ o conjunto de parâmetros que maximiza a função objetivo:
+  1. Comece com alguns valores iniciais dos parâmetros, $\theta^0$
+  2. Calcula-se o gradiente e avalia-se a possibilidade de "andar para cima" a um valor mais alto
+  3. Caso possa, ande na direção correta a $\theta_1$
+  4. Repita os passos (2) e (3), andando de $\theta^s$ para $\theta^{s+1}$ até
+  atingir o máximo com $\theta^*$.
+
+<center><img src="https://fhnishida.github.io/fearp/eco1/steepest_ascent.png"></center>
+
+- Note que esse método de otimização é sensível ao conjunto de parâmetros iniciais e a descontinuidades da função objetivo.
+- Por outro lado, é um método mais eficiente (calcula uma função objetivo dado os parâmetros a cada passo que dá) e tende a ser também mais preciso nas estimações.
+
+
+
+## Estimação por MLE
+- [ResEcon 703](https://github.com/woerman/ResEcon703) - Week 6 (University of Massachusetts Amherst)
+
+<!-- Para uma equação de regressão geral -->
+<!-- $$ y_i = \beta' X + \varepsilon $$ -->
+<!-- supondo distribuição normal do termo de erro -->
+<!-- $$ \varepsilon \sim \mathcal{N}(0, \sigma^2), $$ -->
+<!-- temos uma distribuição condicional de $y$ dada por -->
+<!-- $$ y | X \sim \mathcal{N}(\beta'X, \sigma^2). $$ -->
+
+<!-- Logo, a função log-verossimilhança (condicional) é -->
+<!-- $$ \ln{L(\beta, \sigma^2 | y, X)} = \sum^n_{i=1}{\ln{f(y | X, \beta, \sigma^2)}}. $$ -->
+
+<!-- Em nosso exemplo, temos que estimar 4 parâmetros -->
+<!-- $$ \theta = \left( \beta_0, \beta_1, \beta_2, \sigma^2 \right). $$ -->
+
+<!-- Podemos: -->
+
+<!-- - Tomar derivadas de $\ln{L(\beta, \sigma^2 | y, X)}$ em relação a cada parâmetro e resolver as CPOs, ou -->
+<!-- - Maximizar $\ln{L(\beta, \sigma^2 | y, X)}$ por otimização numérica. -->
+
+### Intuição do cálculo da função de verossimilhança
+- Apenas para ilustrar a construção da função de verossimilhança, considere um modelo logit em que queremos estimar os indivíduos precisam escolher se usam carro ou ônibus para deslocamento.
+- Para estimar as probabilidades de usar carro (e, por consequência, de ônibus), vamos utilizar as informações dos preços que os indivíduos pagam pela gasolina e pela passagem de ônibus.
+- Note que os valores abaixo foram todos inventados.
+- Considere um conjunto de parâmetros $\theta^A = \{ \beta^A_0, \beta^A_1, \beta^A_2 \}$ que gerem as seguintes probabilidades de usar carro e de ônibus (últimas 2 colunas):
+
+|             | **Preço Gasolina** | **Preço Bus** | **Escolha** | **_Prob(Car  $| \theta^A$)_** | **_Prob(Bus $| \theta^A$)_** |
+|:-----------:|:------------------:|:----------------:|:-----------:|:-----------------:|:------------------:|
+| Indiv. 1 |        6,93        |       5,00       |    Car    |        **0,63**       |        0,37        |
+| Indiv. 2 |        7,01        |       2,50       |    Bus   |        0,33       |        **0,67**        |
+| Indiv. 3 |        6,80        |       2,50       |    Bus   |        0,25       |        **0,75**        |
+| Indiv. 4 |        6,75        |       5,00       |    Car    |        **0,73**       |        0,27        |
+
+- Logo, a verossimilhança, dado os parâmetros $\theta^A$ é
+$$ \mathcal{L}(\theta^A) = 0,63 \times 0,67 \times 0,75 \times 0,73 = 0,231 $$
+- Agora, considere $\theta^B = \{ \beta^B_0, \beta^B_1, \beta^B_2 \}$ que gerem as seguintes probabilidades:
+
+|             | **Preço Gasolina** | **Preço Bus** | **Escolha** | **_Prob(Car  $| \theta^B$)_** | **_Prob(Bus $| \theta^B$)_** |
+|:-----------:|:------------------:|:----------------:|:-----------:|:-----------------:|:------------------:|
+| Indiv. 1 |        6,93        |       5,00       |    Car    |        **0,54**       |        0,46        |
+| Indiv. 2 |        7,01        |       2,50       |    Bus   |        0,43       |        **0,57**        |
+| Indiv. 3 |        6,80        |       2,50       |    Bus   |        0,35       |        **0,65**        |
+| Indiv. 4 |        6,75        |       5,00       |    Car    |        **0,58**       |        0,42        |
+
+- Então, a verossimilhança, dado $\theta^B$, é
+$$ \mathcal{L}(\theta^B) = 0,54 \times 0,57 \times 0,65 \times 0,58 = 0,116 $$
+- Como $\mathcal{L}(\theta^A) = 0,231 > 0,116 = \mathcal{L}(\theta^B)$, então os parâmetros $\theta^A$ se mostram mais adequados em relação a $\theta^B$
+- Na máxima verossimilhança (MLE), é escolhido o conjunto de parâmetros $\theta^*$ que maximiza a função de verossimilhança (ou log-verossimilhança).
+- No modelo logit, as probabilidades usadas para calcular a verossimilhança são as próprias proabilidades de escolha por uma alternativa, dado um conjunto de parâmetros.
+- Já no modelo linear, usamos a função de densidade de probabilidade para avaliar a "distância" de cada observação, $y_i$, em relação ao seu valor ajustado $\hat y_i$, dado um conjunto de parâmetros.
+
+
+
+### Otimização Numérica para MLE
+A função `optim()` do R será usada novamente para desempenhar a otimização numérica. Precisamos usar como input:
+
+- Alguns valores inicias dos parâmetros, $\theta^0$
+- Uma função que tome esses parâmetros como um argumento e calcule a 
+log-verossimilhança, $\ln{L(\theta)}$.
+
+<!-- Como `optim()` irá encontrar os parâmetros que minimizem a função objetivo, precisamos adaptar o output da função de log-verossimilhança (minimizaremos o negativo da log-lik). -->
+
+A função log-verossimilhança é dada por
+$$ \ln{L(\beta, \sigma^2 | y, X)} = \sum^n_{i=1}{\ln{f(y_i | x_i, \beta, \sigma^2)}}, $$
+em que a distribuição condicional de cada $y_i$ é
+$$ y_i | x_i \sim \mathcal{N}(\beta'x_i, \sigma^2) $$
+
+1. Construir matriz $X$ e vetor $y$
+2. Calcular os valores ajustados de $y$, $\hat{y} - \beta'x_i$, que é a média de cada $y_i$
+3. Calcular a densidade para cada $y_i$, $f(y_i | x_i, \beta, \sigma^2)$
+4. Calcular a log-verossimilhança, $\ln{L(\beta, \sigma^2 | y, X)} = \sum^n_{i=1}{\ln{f(y_i | x_i, \beta, \sigma^2)}}$
+
+
+#### 1. Chute de valores iniciais para $\beta_0, \beta_1, \beta_2$ e $\sigma^2$
+- Note que, diferente da estimação por OLS, um dos parâmetros a ser estimado via MLE é a variância ($\sigma^2$).
+
+```r
+params = c(35, -0.02, -3.5, 1)
+# (beta_0, beta_1 , beta_2, sigma2)
+```
+
+#### 2. Seleção da base de dados e variáveis
+
+```r
+## Adicionando colunas de 1's para o termo constante
+data = mtcars
+beta_0 = params[1]
+beta_1 = params[2]
+beta_2 = params[3]
+sigma2 = params[4]
+```
+
+#### 3. Cálculo dos valores ajustados e das densidades
+
+```r
+## Calculando valores ajustados de y
+y_hat = beta_0 + beta_1*data$hp + beta_2*data$wt
+```
+
+#### 4. Cálculo das densidades
+$$ f(y_i | x_i, \beta, \sigma^2) $$
+
+```r
+## Calculando os pdf's de cada outcome
+y_pdf = dnorm(data$mpg, mean = y_hat, sd = sqrt(sigma2))
+
+head(y_pdf) # Primeiros valores da densidade
+```
+
+```
+## [1] 0.01255811 0.08817854 0.03394076 0.39462606 0.29887241 0.01070560
+```
+
+```r
+prod(y_pdf) # Verossimilhança
+```
+
+```
+## [1] 2.331786e-67
+```
+
+- Para entender melhor o que estamos fazendo aqui, relembre que, na estimação por máxima verossimilhança, assume-se que
+$$\varepsilon | X \sim N(0, \sigma^2)$$
+- No exemplo abaixo, podemos ver que, para cada $x$, temos um valor ajustado $\hat{y} = \beta_0 + \beta_1 x$ e seus desvios $\varepsilon$ são normalmente distribuídos com a mesma variância $\sigma^2$
+
+<center><img src="https://fhnishida.github.io/fearp/eco1/mle.jpg"></center>
+- Agora, vamos juntar o data frame `mtcars` com os valores ajustados `mpg_hat` e as densidades `y_pdf`:
+
+```r
+mpg_hat = y_hat # atribuindo y_hat a um objeto com nome mais adequado
+
+# Juntando as bases e visualizando os primeiros valores
+bd_joined = cbind(mtcars, mpg_hat, y_pdf) %>%
+  select(hp, wt, mpg, mpg_hat, y_pdf)
+head(bd_joined)
+```
+
+```
+##                    hp    wt  mpg mpg_hat      y_pdf
+## Mazda RX4         110 2.620 21.0 23.6300 0.01255811
+## Mazda RX4 Wag     110 2.875 21.0 22.7375 0.08817854
+## Datsun 710         93 2.320 22.8 25.0200 0.03394076
+## Hornet 4 Drive    110 3.215 21.4 21.5475 0.39462606
+## Hornet Sportabout 175 3.440 18.7 19.4600 0.29887241
+## Valiant           105 3.460 18.1 20.7900 0.01070560
+```
+- Como pode ser visto na base de dados juntada e nos gráficos abaixo, quanto mais próximo o valor ajustado for do valor observado de cada observação, maior será a densidade/probabilidade.
+
+```r
+# Criando gráfico para os 2 primeiros carros (Mazda RX4 e Mazda RX 4 Wag)
+qt_norm = seq(20, 27, by=0.1) # valores de mpg ("escores Z")
+
+# Mazda RX4
+pdf_norm1 = dnorm(qt_norm, mean=bd_joined$mpg_hat[1], sd=sqrt(sigma2)) # pdf
+plot(qt_norm, pdf_norm1, type="l", xlab="mpg", ylab="densidade", main="Mazda RX4")
+abline(v=c(bd_joined$mpg_hat[1], bd_joined$mpg[1]), col="red")
+text(c(bd_joined$mpg_hat[1], bd_joined$mpg[1]), 0.2, 
+     c(expression(widehat(mpg)[1]), expression(mpg[1])), 
+     pos=2, srt=90, col="red")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-195-1.png" width="672" />
+
+```r
+# Mazda RX4 Wag 
+pdf_norm2 = dnorm(qt_norm, mean=bd_joined$mpg_hat[2], sd=sqrt(sigma2)) # pdf
+plot(qt_norm, pdf_norm2, type="l", xlab="mpg", ylab="densidade", main="Mazda RX4 Wag")
+abline(v=c(bd_joined$mpg_hat[2], bd_joined$mpg[2]), col="blue")
+text(c(bd_joined$mpg_hat[2], bd_joined$mpg[2]), 0.2, 
+     c(expression(widehat(mpg)[2]), expression(mpg[2])), 
+     pos=2, srt=90, col="blue")
+```
+
+<img src="Monitorias_2022_files/figure-html/unnamed-chunk-195-2.png" width="672" />
+- Logo, a verossimilhança (produto de todas probabilidades) será maior quanto mais próximos forem os valores ajustados dos seus respectivos valores observados.
+
+
+#### 5. Calculando a Log-Verossimilhança
+$$ \mathcal{l}(\beta, \sigma^2) = \sum^{N}_{i=1}{\ln\left[ f(y_i | x_i, \beta, \sigma^2) \right]} $$
+
+```r
+## Calculando a log-verossimilhanca
+loglik = sum(log(y_pdf))
+loglik
+```
+
+```
+## [1] -153.4266
+```
+
+
+#### 6. Criando a Função de Log-Verossimilhança
+
+```r
+## Criando funcao para calcular log-verossimilhanca OLS 
+loglik_lm = function(params, data) {
+  # Pegando os parâmetros
+  beta_0 = params[1]
+  beta_1 = params[2]
+  beta_2 = params[3]
+  sigma2 = params[4]
+  
+  ## Calculando valores ajustados de y
+  y_hat = beta_0 + beta_1*data$hp + beta_2*data$wt
+  
+  ## Calculando os pdf's de cada outcome
+  y_pdf = dnorm(data$mpg, mean = y_hat, sd = sqrt(sigma2))
+  
+  ## Calculando a log-verossimilhanca
+  loglik = sum(log(y_pdf))
+  
+  ## Retornando o negativo da log-verossimilanca - optim() não maximiza
+  -loglik
+}
+```
+
+
+#### 7. Otimização
+
+Tendo a função objetivo, usaremos `optim()` para *minimizar*
+$$ -\ln{L(\beta, \sigma^2 | y, X)} = -\sum^n_{i=1}{\ln{f(y_i | x_i, \beta, \sigma^2)}}. $$
+Aqui, **minimizamos o negativo** da log-Verossimilhança para **maximizarmos** (função`optim()` apenas minimiza).
+
+
+```r
+## Maximizando a função log-verossimilhança OLS
+mle = optim(par = c(0, 0, 0, 1), fn = loglik_lm, data = mtcars,
+              method = "BFGS", hessian = TRUE)
+
+## Mostrando os resultados da otimização
+mle
+```
+
+```
+## $par
+## [1] 37.227256 -0.031773 -3.877825  6.095146
+## 
+## $value
+## [1] 74.32617
+## 
+## $counts
+## function gradient 
+##      105       41 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL
+## 
+## $hessian
+##              [,1]         [,2]         [,3]         [,4]
+## [1,] 5.250080e+00 7.701211e+02 1.689082e+01 1.715961e-06
+## [2,] 7.701211e+02 1.368758e+05 2.702437e+03 2.252101e-04
+## [3,] 1.689082e+01 2.702437e+03 5.921123e+01 2.589928e-06
+## [4,] 1.715961e-06 2.252101e-04 2.589928e-06 4.306909e-01
+```
+
+```r
+## Calculando os erros padrão
+mle_se = mle$hessian %>% # hessiano
+  solve() %>% # toma a inversa para obter a matriz de var/cov
+  diag() %>% # pega a diagonal da matriz
+  sqrt() # calcula a raiz quadrada
+
+# Visualizando as estimativas e os erros padrão
+cbind(mle$par, mle_se)
+```
+
+```
+##                     mle_se
+## [1,] 37.227256 1.521988303
+## [2,] -0.031773 0.008595959
+## [3,] -3.877825 0.602339558
+## [4,]  6.095146 1.523762060
+```
+
+
+<!-- #### Cálculo dos erros padrão via Bootstrap -->
+
+<!-- ```{r warning=FALSE} -->
+<!-- reps = 50 -->
+<!-- est_tab = matrix(0, reps, 4) -->
+
+<!-- for (i in 1:reps) { -->
+<!--   i_resample = sample(1:nrow(mtcars), nrow(mtcars), replace=TRUE) # reamostragem de índices c/ reposição -->
+<!--   resample = mtcars[i_resample, c("mpg", "hp", "wt")] -->
+
+<!--   fit_resample = optim(par = mle$par, fn = loglik_lm, data = resample, -->
+<!--                        method = "BFGS", hessian = TRUE) -->
+
+<!--   est_tab[i,] = fit_resample$par -->
+<!-- } -->
+
+<!-- head(est_tab, 10) # estimativas bootstrapeadas -->
+<!-- apply(est_tab, 2, sd) # erros padrão bootstrapeados -->
+<!-- ``` -->
+
+
+
+## Estimação por GMM
+- [Computing Generalized Method of Moments and Generalized Empirical Likelihood with R (Pierre Chaussé)](https://cran.r-project.org/web/packages/gmm/vignettes/gmm_with_R.pdf)
+- [Generalized Method of Moments (GMM) in R - Part 1 (Alfred F. SAM)](https://medium.com/codex/generalized-method-of-moments-gmm-in-r-part-1-of-3-c65f41b6199)
+
+
+- Para estimar via GMM precisamos construir vetores relacionados aos seguintes momentos:
+$$ E(\varepsilon) = 0 \qquad \text{ e } \qquad E(\varepsilon'X) = 0 $$
+em que $X$ é a matriz de covariadas e $\varepsilon$ é o desvio. Note que estes são os momentos relacionados ao OLS, dado que este é um caso particular do GMM.
+
+
+- Relembre que estamos usando a base de dados `mtcars` para estimar o modelo linear:
+$$ \text{mpg} = \beta_0 + \beta_1 \text{hp} + \beta_2 \text{wt} + \varepsilon $$
+que relaciona o consumo de combustível (em milhas por galão - _mpg_) com a potência (_hp_) e o peso (em mil libras - _wt_) do carro.
+
+
+### Otimização Numérica para GMM
+
+#### 1. Chute de valores iniciais para $\beta_0$, $\beta_1$ e $\beta_2$
+- Vamos criar um vetor com possíveis valores de $\beta_0, \beta_1, \beta_2$:
+
+```r
+library(dplyr)
+
+params = c(35, -0.02, -3.5)
+beta_0 = params[1]
+beta_1 = params[2]
+beta_2 = params[3]
+```
+
+#### 2. Seleção da base de dados e variáveis
+
+```r
+data = mtcars %>% mutate(constant=1) # Criando variável de constante
+
+## Selecionando colunas para X (covariadas) e convertendo para matrix
+X = data %>% 
+  select("constant", "hp", "wt") %>% 
+  as.matrix()
+
+## Selecionando variavel para y e convertendo para matrix
+y = data %>% 
+  select("mpg") %>% 
+  as.matrix()
+```
+
+#### 3. Cálculo dos valores ajustados e dos desvios
+
+```r
+## Valores ajustados e desvios
+y_hat = X %*% params
+# equivalente a: y_hat = beta_0 + beta_1 * X[,"hp"] + beta_2 * X[,"wt"]
+
+e = y - y_hat
+```
+
+#### 4. Criação da matriz de momentos
+- Note que $E(\varepsilon' X)$ é uma multiplicação matricial, mas a função `gmm()` exige que como input os vetores com multiplicação elemento a elemento do resíduo $\varepsilon$ com as covariadas $X$ (neste caso: constante, hp, wt)
+
+```r
+m = X * as.vector(e) # matriz de momentos (sem tomar esperança)
+head(m)
+```
+
+```
+##                   constant       hp         wt
+## Mazda RX4          -2.6300 -289.300 -6.8906000
+## Mazda RX4 Wag      -1.7375 -191.125 -4.9953125
+## Datsun 710         -2.2200 -206.460 -5.1504000
+## Hornet 4 Drive     -0.1475  -16.225 -0.4742125
+## Hornet Sportabout  -0.7600 -133.000 -2.6144000
+## Valiant            -2.6900 -282.450 -9.3074000
+```
+- Note que, como multiplicamos a constante igual a 1 com os desvios $\varepsilon$, a 1ª coluna corresponde ao momento $E(\varepsilon)=0$ (mas sem tomar a esperança).
+- Já as colunas 2 e 3 correspodem ao momento $E(\varepsilon'X)=0$ para as variáveis _hp_ e _wt_ (também sem tomar a esperança).
+- Logicamente, para estimar por GMM, precisamos escolher os parâmetros $\theta = \{ \beta_0, \beta_1, \beta_2 \}$ que, ao tomar a esperança em cada um destas colunas, se aproximem ao máximo de zero. Isso será feito via função `gmm()` (semelhante à função `optim()`)
+
+
+#### 5. Criação de função com os momentos
+- Vamos criar uma função que tem como input um vetor de parâmetros (`params`) e uma base de dados (`data`), e que retorna uma matriz em que cada coluna representa um momento.
+- Essa função incluirá todos os comandos descritos nos itens 1 a 4 (que, na verdade, apenas foram feitos por didática).
+
+```r
+mom_ols = function(params, data) {
+  ## Adicionando colunas de 1's para o termo constante
+  data = data %>% mutate(constant = 1)
+  
+  ## Selecionando colunas para X (covariadas) e convertendo para matrix
+  X = data %>% 
+    select("constant", "hp", "wt") %>% 
+    as.matrix()
+  
+  ## Selecionando variavel para y e convertendo para matrix
+  y = data %>% 
+    select("mpg") %>% 
+    as.matrix()
+  
+  ## Valores ajustados e desvios
+  y_hat = X %*% params
+  e = y - y_hat
+  
+  m = as.vector(e) * X # matriz de momentos (vetor - multiplicação por elemento)
+  m
+}
+```
+
+
+#### 6. Otimização via função `gmm()`
+- A função `gmm()`, assim como a `optim()`, recebe uma função como argumento.
+- No entanto, ao invés de retornar um valor, a função que entra no `gmm()` retorna uma matriz, cujas médias das colunas queremos aproximar de zero. 
+
+```r
+library(gmm)
+```
+
+```
+## Warning: package 'gmm' was built under R version 4.2.2
+```
+
+```
+## Carregando pacotes exigidos: sandwich
+```
+
+```
+## Warning: package 'sandwich' was built under R version 4.2.2
+```
+
+```r
+gmm_lm = gmm(mom_ols, mtcars, c(0,0,0),
+             wmatrix = "optimal", # matriz de ponderação
+             optfct = "nlminb" # função de otimização
+             )
+
+summary(gmm_lm)$coefficients
+```
+
+```
+##             Estimate  Std. Error   t value      Pr(>|t|)
+## Theta[1] 37.22727054 1.477465796 25.196705 4.352959e-140
+## Theta[2] -0.03177295 0.007330972 -4.334070  1.463775e-05
+## Theta[3] -3.87783083 0.595735804 -6.509313  7.549526e-11
+```
+
+
+# Dados em Painel
+
+## Manipulação de dados em painel
+- Para o que estamos estudando, é normalmente exigido que os dados estejam
+    - no formato _long_: para cada indivíduo, temos uma linha para cada período;
+    - _balanceados_: o tamanho da amostra é $N \times T$, com $N$ indivíduos e $T$ períodos; e
+    - devidamente ordenados por indivíduos e, depois, por tempo.
+
+
+<center><img src="https://www.theanalysisfactor.com/wp-content/uploads/2013/10/image002.jpg"></center>
+
+- Em muitos casos, as informações são disponibilizadas em várias bases de dados de cortes transversais (_cross sections_), então é necessário estruturar a base de dados em painel.
+- Isso por ser feito no R de, pelo menos, duas formas:
+    - empilhando as bases de dados e filtrando apenas indivíduos que aparecem em todos períodos; ou
+    - fazendo a junção interna (_inner join_) das bases por indivíduo e transformando do formato _wide_ para o _long_.
+- Como exemplo, usaremos a PNAD Contínua que é publicada trimestralmente e possui o pacote `PNADcIBGE` que auxilia na sua utilização.
+- Os dados podem ser obtidos via`read_pnadc(microdata, input_txt)` que necessita que você faça download das bases de dados e do txt com informações das variáveis (_input_txt_) no [FTP do IBGE](https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/):
+
+```r
+# install.packages("PNADcIBGE")
+library(PNADcIBGE)
+```
+
+```
+## Warning: package 'PNADcIBGE' was built under R version 4.2.2
+```
+
+```r
+library(dplyr)
+```
+- O arquivo compactado .zip é cerca de 12\% do arquivo descompactado .txt (133mb $\times$ 1,08gb). Para não precisar manter o arquivo .txt no computador, podemos usar a função `unz()` para descompactar arquivos temporariamente:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
